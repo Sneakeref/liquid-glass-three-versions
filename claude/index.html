@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>液态玻璃实验室</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- 图标 sprite -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7v8.5a1 1 0 0 1-1 1H15v-6h-6v6H4.5a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></symbol>
+    <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="m4 17 5-4.5 4 3.5 3-2.5 4 3.5"/></symbol>
+    <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4-5.5 7.5-5.5s6.3 1.9 7.5 5.5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M14.5 5 7.5 12l7 7"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3.5v11M8 7.5l4-4 4 4M6 11v8.5h12V11"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/></symbol>
+  </svg>
+
+  <header class="masthead">
+    <p class="eyebrow">WWDC25 · Liquid Glass 原理复刻</p>
+    <h1>液态玻璃实验室</h1>
+    <p class="lede">用一张置换贴图在平面上模拟折射：先统一缩放界面，再拉伸放大边缘，就得到了透镜。下面的按钮、开关、滑块、标签栏都是原生 HTML + CSS + SVG 滤镜，没有任何依赖。</p>
+    <p class="support" id="support" role="status"></p>
+  </header>
+
+  <main class="lab">
+    <section class="stage" aria-label="演示手机">
+      <div class="phone">
+        <div class="screen" id="screen">
+          <div class="status-bar" aria-hidden="true"><span>9:41</span><span class="sb-right"><i></i><i></i><b></b></span></div>
+
+          <div class="scroller" id="scroller">
+            <div class="feed">
+              <p class="feed-kicker">十月十九日 · 周一</p>
+              <h2 class="feed-title">光的折痕</h2>
+
+              <figure class="hero" id="hero">
+                <div class="hero-art" id="heroArt"></div>
+                <figcaption>日落之后的十二分钟，<br>天空像被拉伸过的玻璃。</figcaption>
+              </figure>
+
+              <div class="card controls-card">
+                <div class="row">
+                  <span>专注模式</span>
+                  <button class="switch is-on" id="sw1" role="switch" aria-checked="true" aria-label="专注模式"><span class="switch-thumb lg" data-lg-k=".55"></span></button>
+                </div>
+                <div class="row">
+                  <span>飞行模式</span>
+                  <button class="switch" id="sw2" role="switch" aria-checked="false" aria-label="飞行模式"><span class="switch-thumb lg" data-lg-k=".55"></span></button>
+                </div>
+                <div class="row row-col">
+                  <span>亮度 <output id="brightOut">62%</output></span>
+                  <div class="slider" id="slider" role="slider" tabindex="0" aria-label="亮度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="62">
+                    <div class="slider-track"><div class="slider-fill"></div></div>
+                    <div class="slider-thumb lg" data-lg-k=".6"></div>
+                  </div>
+                </div>
+                <div class="segmented" id="seg" role="tablist" aria-label="时间范围">
+                  <button role="tab" aria-selected="true">日</button>
+                  <button role="tab" aria-selected="false">周</button>
+                  <button role="tab" aria-selected="false">月</button>
+                  <button role="tab" aria-selected="false">年</button>
+                  <span class="seg-drop lg" data-lg-k=".45" data-lg-zoom="1.12" data-lg-blur="0"></span>
+                </div>
+                <div class="btn-row">
+                  <button class="gbtn lg is-tinted" id="openSheet">打开面板</button>
+                  <button class="gbtn lg">稍后</button>
+                </div>
+              </div>
+
+              <p class="prose">玻璃不需要真的弯曲光线。只要知道每个像素该从哪里取色，就能在平面上骗过眼睛。边缘取得远一点，中间取得近一点，文字就会沿着玻璃的弧面流动。</p>
+
+              <div class="tiles">
+                <div class="tile t-check"></div>
+                <div class="tile t-stripe"></div>
+                <div class="tile t-type">Aa<small>字形</small></div>
+                <div class="tile t-dots"></div>
+                <div class="tile t-bars"></div>
+                <div class="tile t-grid"></div>
+              </div>
+
+              <p class="prose">在 visionOS 里你可以绕着窗口走一圈，平面模拟就会穿帮；在手机上视角是固定的，二维的假折射就足够真实。</p>
+              <p class="prose dim">向上滑动，看内容从标签栏下面流过。</p>
+            </div>
+          </div>
+
+          <!-- 浮动层：工具栏、透镜、标签栏、面板 -->
+          <div class="topbar">
+            <button class="lg icon-btn" aria-label="返回"><svg><use href="#i-chevron"/></svg></button>
+            <div class="lg capsule-group">
+              <button class="icon-btn bare" aria-label="分享"><svg><use href="#i-share"/></svg></button>
+              <button class="icon-btn bare" aria-label="更多"><svg><use href="#i-more"/></svg></button>
+            </div>
+          </div>
+
+          <div class="lens lg" id="lens" data-lg-k="1.7" data-lg-zoom="1.16" aria-label="可拖动透镜"></div>
+
+          <nav class="tabbar-wrap" aria-label="标签栏">
+            <div class="tabbar lg" id="tabbar" role="tablist">
+              <button role="tab" aria-selected="true"><svg><use href="#i-home"/></svg><span>今日</span></button>
+              <button role="tab" aria-selected="false"><svg><use href="#i-compass"/></svg><span>发现</span></button>
+              <button role="tab" aria-selected="false"><svg><use href="#i-photo"/></svg><span>相册</span></button>
+              <button role="tab" aria-selected="false"><svg><use href="#i-person"/></svg><span>我的</span></button>
+            </div>
+            <span class="tab-drop lg" id="tabDrop" data-lg-k=".5" data-lg-zoom="1.14" data-lg-blur="0"></span>
+            <button class="lg icon-btn search-btn" aria-label="搜索"><svg><use href="#i-search"/></svg></button>
+          </nav>
+
+          <div class="sheet lg" id="sheet" hidden data-lg-k="1.3">
+            <div class="sheet-head">
+              <strong>显示与亮度</strong>
+              <button class="lg icon-btn small" id="closeSheet" aria-label="关闭"><svg><use href="#i-close"/></svg></button>
+            </div>
+            <p>这块面板占了屏幕一半以上。关掉右侧的“面积自适应”，它会保持通透，背后的文字和图案会穿过来，很难读；打开后，玻璃面积越大，虚化越重、折射越弱。</p>
+            <ul>
+              <li><span>原彩显示</span><b>开</b></li>
+              <li><span>夜览</span><b>22:00 – 7:00</b></li>
+              <li><span>自动锁定</span><b>30 秒</b></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <p class="stage-hint">拖动圆形透镜 · 按住按钮 · 拨动开关和滑块 · 滚动内容</p>
+    </section>
+
+    <aside class="panel" aria-label="参数">
+      <div class="presets" role="group" aria-label="预设">
+        <button data-preset="ios" class="is-active">Liquid Glass</button>
+        <button data-preset="strong">强折射</button>
+        <button data-preset="frost">传统毛玻璃</button>
+      </div>
+
+      <fieldset>
+        <legend>折射 · 置换贴图</legend>
+        <label class="param"><span>折射强度</span><output for="p-refraction"></output>
+          <input type="range" id="p-refraction" data-param="refraction" min="0" max="60" step="1"></label>
+        <label class="param"><span>边缘宽度</span><output for="p-bezel"></output>
+          <input type="range" id="p-bezel" data-param="bezel" min="2" max="40" step="1"></label>
+        <label class="param"><span>预缩放系数</span><output for="p-prescale"></output>
+          <input type="range" id="p-prescale" data-param="prescale" min="0.85" max="1.35" step="0.01"></label>
+        <label class="param"><span>色散</span><output for="p-dispersion"></output>
+          <input type="range" id="p-dispersion" data-param="dispersion" min="0" max="0.4" step="0.01"></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>材质</legend>
+        <label class="param"><span>虚化</span><output for="p-blur"></output>
+          <input type="range" id="p-blur" data-param="blur" min="0" max="14" step="0.1"></label>
+        <label class="param"><span>饱和度</span><output for="p-saturation"></output>
+          <input type="range" id="p-saturation" data-param="saturation" min="1" max="2.6" step="0.05"></label>
+        <label class="param"><span>遮罩浓度</span><output for="p-tint"></output>
+          <input type="range" id="p-tint" data-css="tint" min="0" max="0.7" step="0.01"></label>
+        <label class="param"><span>高光</span><output for="p-spec"></output>
+          <input type="range" id="p-spec" data-css="spec" min="0" max="1" step="0.01"></label>
+        <div class="swatches" role="radiogroup" aria-label="遮罩颜色">
+          <span>遮罩颜色</span>
+          <button role="radio" aria-checked="true" data-tint="255 255 255" style="--c:#fff" aria-label="白"></button>
+          <button role="radio" aria-checked="false" data-tint="20 22 28" style="--c:#14161c" aria-label="墨"></button>
+          <button role="radio" aria-checked="false" data-tint="255 196 120" style="--c:#ffc478" aria-label="琥珀"></button>
+          <button role="radio" aria-checked="false" data-tint="120 200 255" style="--c:#78c8ff" aria-label="天青"></button>
+          <label class="swatch-custom" aria-label="自定义颜色"><input type="color" id="p-tintColor" value="#ff7ab6"></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>文章里的设想</legend>
+        <label class="toggle"><input type="checkbox" id="t-adaptive">
+          <span><b>面积自适应</b>玻璃占屏幕越多，虚化越重、折射越弱。打开左边的“打开面板”试试。</span></label>
+        <div class="meter" id="meter" aria-live="polite">
+          <div class="meter-bar"><i id="meterFill"></i></div>
+          <span id="meterText">玻璃占比 —</span>
+        </div>
+        <label class="toggle"><input type="checkbox" id="t-shot">
+          <span><b>截图层</b>模拟分层渲染：截图和录屏只输出折射与虚化，去掉随光线、陀螺仪变化的边缘高光和色散。</span></label>
+        <label class="toggle"><input type="checkbox" id="t-maps">
+          <span><b>显示置换贴图</b>把每个控件当前使用的贴图直接画在它身上。</span></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>背景</legend>
+        <div class="bg-row">
+          <label class="file-btn">换一张图片<input type="file" id="bgFile" accept="image/*"></label>
+          <button id="bgReset" type="button">恢复默认</button>
+        </div>
+      </fieldset>
+    </aside>
+  </main>
+
+  <section class="principle" aria-labelledby="pr-title">
+    <div class="section-head">
+      <h2 id="pr-title">一张贴图是怎么拼出来的</h2>
+      <p>R 通道存水平位移，G 通道存垂直位移，50% 灰表示不动。白色让底图向负方向（左、上）偏移，黑色让底图向正方向（右、下）偏移。右侧参数改动会实时反映在这里。</p>
+    </div>
+    <div class="shape-pick" role="group" aria-label="形状">
+      <button data-shape="capsule" class="is-active">胶囊</button>
+      <button data-shape="rect">圆角矩形</button>
+      <button data-shape="circle">圆形</button>
+    </div>
+    <div class="maps">
+      <figure><canvas id="mapUniform"></canvas><figcaption><b>统一缩放分量</b>以中心为原点整体缩放取样坐标，补偿边缘拉伸带来的缩小</figcaption></figure>
+      <span class="op" aria-hidden="true">+</span>
+      <figure><canvas id="mapEdge"></canvas><figcaption><b>边缘拉伸分量</b>沿圆角矩形的法线，按圆弧轮廓把边缘取样点向内拉</figcaption></figure>
+      <span class="op" aria-hidden="true">=</span>
+      <figure><canvas id="mapAll"></canvas><figcaption><b>置换贴图</b>箭头是每个点的取样方向，长度按比例缩短</figcaption></figure>
+      <span class="op" aria-hidden="true">→</span>
+      <figure><div class="warp-demo" id="warpDemo"><div class="warp-grid" id="warpGrid"></div></div><figcaption><b>作用在网格上</b>同一张贴图喂给 feDisplacementMap 的结果</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="blobs" aria-labelledby="bl-title">
+    <div class="section-head">
+      <h2 id="bl-title">融球</h2>
+      <p>同样的“边缘拉伸”算法搬到 WebGL 着色器里，形状换成多个圆的平滑并集。几十个玻璃体实时融合，每帧只是一次全屏采样。拖动画布可以抓住一颗。</p>
+    </div>
+    <div class="blob-stage">
+      <canvas id="blobCanvas" aria-label="融球演示"></canvas>
+      <span class="fps" id="fps">— fps</span>
+    </div>
+    <div class="blob-controls">
+      <label class="param"><span>数量</span><output for="b-count"></output><input type="range" id="b-count" min="2" max="40" step="1" value="9"></label>
+      <label class="param"><span>融合度</span><output for="b-k"></output><input type="range" id="b-k" min="0" max="80" step="1" value="36"></label>
+      <label class="param"><span>折射强度</span><output for="b-refr"></output><input type="range" id="b-refr" min="0" max="80" step="1" value="38"></label>
+      <label class="param"><span>虚化</span><output for="b-blur"></output><input type="range" id="b-blur" min="0" max="12" step="0.5" value="2"></label>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>完整折射效果需要 Chromium 内核（Chrome、Edge、Arc）的 <code>backdrop-filter: url()</code>；Safari 和 Firefox 会自动回退为毛玻璃，融球演示在所有浏览器里都能完整运行。</p>
+  </footer>
+
+  <script src="liquid-glass.js"></script>
+  <script src="demo.js"></script>
+  <script src="metaballs.js"></script>
+</body>
+</html>

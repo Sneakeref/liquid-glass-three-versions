@@ -1,0 +1,84 @@
+{
+  "saved_on": "2026-10-19",
+  "note": "Original page files preserved byte-for-byte. Platform labels identify the supplied sources, not verified model IDs.",
+  "files": [
+    {
+      "platform": "ChatGPT Pro",
+      "file": "chatgpt-pro/index.html",
+      "bytes": 59560,
+      "sha256": "87651fb542017fdf6e828b09f0164f54108cca87db58ec134272739d865522cc"
+    },
+    {
+      "platform": "Claude",
+      "file": "claude/index.html",
+      "bytes": 15188,
+      "sha256": "17d57ef2e7093bb7733a60167c0777869818dee944aaab215c3391d44557dab6"
+    },
+    {
+      "platform": "Claude",
+      "file": "claude/styles.css",
+      "bytes": 21072,
+      "sha256": "fbcceaf6eb0c570592fcdcc99b53d94f648cee38be2e028406a6b2e6847c381c"
+    },
+    {
+      "platform": "Claude",
+      "file": "claude/liquid-glass.js",
+      "bytes": 14683,
+      "sha256": "36aaf3f1b226b05c4f9c2277bbae44633aaf304bb285d0db375c55750806dad0"
+    },
+    {
+      "platform": "Claude",
+      "file": "claude/demo.js",
+      "bytes": 22461,
+      "sha256": "e4408a2db16b769007095b5ab00855acde094564b103f19e03a920c9a4b88b48"
+    },
+    {
+      "platform": "Claude",
+      "file": "claude/metaballs.js",
+      "bytes": 10896,
+      "sha256": "6b050ceda16a949eb2bda114e69b93ce1abb5e7339e5cab562b89924502f2469"
+    },
+    {
+      "platform": "Codex",
+      "file": "codex/index.html",
+      "bytes": 13336,
+      "sha256": "98ca4eaab604682d7da252920853b111232edcf1cdcaac979f52ba512c7a7ee9"
+    },
+    {
+      "platform": "Codex",
+      "file": "codex/styles.css",
+      "bytes": 24810,
+      "sha256": "69a8ffa535d09acbda877f63cfc536610ece3a70bcb149c3ab45e6ba13426b0a"
+    },
+    {
+      "platform": "Codex",
+      "file": "codex/liquid-glass.js",
+      "bytes": 11345,
+      "sha256": "e754c9564fcc63f08bb8550ba055faa28a8970a2f4847e54b6f96e29d970ec00"
+    },
+    {
+      "platform": "Codex",
+      "file": "codex/app.js",
+      "bytes": 16683,
+      "sha256": "0d34fe8f027f5c2a5cf552c98588c88901754f8a670ec807c29193beb35933a5"
+    },
+    {
+      "platform": "Codex",
+      "file": "codex/README.md",
+      "bytes": 6196,
+      "sha256": "84aa6b50a943800b4cc8d55f16b703370534955e257518a5898b8e2af40d604d"
+    },
+    {
+      "platform": "Codex",
+      "file": "codex/VERIFICATION.md",
+      "bytes": 2163,
+      "sha256": "63b39945fbda163efdc710f2b3423f26e477c403f38086e285058d7329f4e5bf"
+    },
+    {
+      "platform": "Codex",
+      "file": "codex/standalone.html",
+      "bytes": 66109,
+      "sha256": "5a1f2eea0d658aa7fc89328de9133c95d69ecb6136f94520b567efba6a7691e5"
+    }
+  ]
+}

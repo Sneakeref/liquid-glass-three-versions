@@ -1,0 +1,1916 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7f9">
+  <meta name="description" content="原生 Web 液态玻璃控件实验室。实时调节二维折射、模糊、高光与融球效果。">
+  <title>Liquid — 液态玻璃实验室</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23171920'/%3E%3Cpath d='M32 12C25 23 18 30 18 39a14 14 0 0028 0c0-9-7-16-14-27z' fill='%23d5e6ff'/%3E%3C/svg%3E">
+  <style>
+:root {
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Microsoft YaHei",sans-serif;
+  color:#24272f;
+  background:#f7f8fa;
+  font-synthesis:none;
+  --accent:#586be8;
+  --muted:#9297a4;
+  --line:#e8eaf0
+}
+* {
+  box-sizing:border-box
+}
+body {
+  margin:0
+}
+button,input,a {
+  -webkit-tap-highlight-color:transparent
+}
+button,input {
+  font:inherit
+}
+button {
+  cursor:pointer
+}
+button {
+  color:inherit
+}
+button:focus-visible,a:focus-visible {
+  outline:3px solid #8094ff;
+  outline-offset:4px
+}
+input:focus-visible {
+  outline:2px solid #8094ff;
+  outline-offset:5px
+}
+button {
+  border:0;
+  background:none
+}
+svg {
+  width:21px;
+  height:21px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.7;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  flex-shrink:0
+}
+.icon-defs {
+  position:absolute;
+  width:0;
+  height:0;
+  overflow:hidden
+}
+.site-header {
+  height:86px;
+  max-width:1504px;
+  margin:auto;
+  padding:0 58px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line)
+}
+.wordmark {
+  display:flex;
+  align-items:center;
+  color:#20232b;
+  text-decoration:none;
+  font-size:27px;
+  font-weight:650;
+  letter-spacing:-1px
+}
+.brand-symbol {
+  width:35px;
+  height:39px;
+  border-radius:13px;
+  margin-right:10px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(145deg,#fff,#e3e9f1);
+  box-shadow:inset 0 0 0 1px #d6dde7,0 2px 5px #1c294b0c
+}
+.brand-symbol svg {
+  width:25px;
+  height:25px;
+  color:#7c90a8;
+  stroke-width:1.2
+}
+.wordmark-dot {
+  color:#7b89db
+}
+.brand-divider {
+  height:19px;
+  width:1px;
+  background:#dcdfe7;
+  margin:0 19px
+}
+.brand-note {
+  font-size:12px;
+  font-weight:450;
+  letter-spacing:1px;
+  color:#7b8190
+}
+.header-right {
+  display:flex;
+  align-items:center;
+  gap:28px
+}
+.native-badge {
+  font-size:11px;
+  color:#8b909d;
+  display:flex;
+  align-items:center;
+  gap:7px
+}
+.native-badge i,.live-dot {
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:#6eaa8e
+}
+.text-button {
+  font-size:12px;
+  display:flex;
+  gap:8px;
+  align-items:center
+}
+.text-button svg {
+  width:16px;
+  height:16px
+}
+main {
+  max-width:1504px;
+  margin:auto;
+  padding:46px 58px 0
+}
+.intro {
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  margin-bottom:36px
+}
+.eyebrow {
+  font-size:10px;
+  letter-spacing:2px;
+  font-weight:550;
+  color:#8d94a6
+}
+.eyebrow span {
+  margin:0 9px;
+  color:#b2b6c0
+}
+h1 {
+  font-size:43px;
+  font-weight:540;
+  letter-spacing:-2px;
+  line-height:1.25;
+  margin:15px 0 12px
+}
+h1>span {
+  color:#8491ca
+}
+.intro p {
+  font-size:13px;
+  color:#8b90a0;
+  letter-spacing:.25px;
+  margin:0
+}
+.intro-note {
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  color:#9da2ae;
+  font-size:10px;
+  letter-spacing:.2px;
+  padding-bottom:3px
+}
+.intro-note span:last-child {
+  display:flex;
+  align-items:center;
+  gap:9px
+}
+.intro-note svg {
+  width:12px;
+  height:12px
+}
+.workspace {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 274px;
+  background:#fff;
+  border:1px solid #e5e7ee;
+  border-radius:19px;
+  box-shadow:0 8px 32px #1d2c4405;
+  overflow:hidden
+}
+.preview-column {
+  padding:20px;
+  min-width:0
+}
+.preview-toolbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  height:30px;
+  margin-bottom:19px;
+  gap:14px
+}
+.preview-title {
+  display:flex;
+  gap:8px;
+  align-items:center;
+  font-size:11px;
+  white-space:nowrap;
+  color:#69707f
+}
+.preview-title .muted {
+  color:#c7ccd6;
+  margin:0 3px
+}
+#scene-name {
+  font-size:10px;
+  color:#9298a6
+}
+.segmented {
+  display:flex;
+  padding:3px;
+  background:#f3f4f7;
+  border-radius:8px;
+  flex-shrink:0
+}
+.segmented button {
+  font-size:10px;
+  padding:6px 11px;
+  border-radius:6px;
+  color:#959ba8;
+  transition:background .2s,color .2s
+}
+.segmented button.selected {
+  background:white;
+  box-shadow:0 1px 4px #22355012;
+  color:#4b5367
+}
+.stage {
+  height:544px;
+  position:relative;
+  border-radius:12px;
+  overflow:hidden;
+  isolation:isolate;
+  background:#718d99;
+  color:white;
+  touch-action:pan-y
+}
+.stage canvas,.merge-stage canvas {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:-1;
+  display:block
+}
+.stage-top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:absolute;
+  left:27px;
+  right:27px;
+  top:24px;
+  pointer-events:none
+}
+.scene-index {
+  font-size:9px;
+  letter-spacing:2px;
+  opacity:.75
+}
+.weather {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:18px;
+  font-weight:300
+}
+.weather svg {
+  width:17px;
+  height:17px;
+  opacity:.8
+}
+.weather>span {
+  font-size:9px;
+  color:#ffffffa6;
+  margin-left:3px
+}
+.scene-description {
+  position:absolute;
+  left:32px;
+  top:59%;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  pointer-events:none
+}
+.scene-description>span:first-child {
+  font-size:11px;
+  color:#fffdf5c9;
+  letter-spacing:1px
+}
+.scene-coordinates {
+  font-size:8px;
+  color:#ffffff6d;
+  letter-spacing:1.4px
+}
+.glass {
+  color:#fff;
+  position:absolute;
+  border:1px solid #ffffff4a;
+  box-shadow:inset 0 1px 1px #ffffff31,0 6px 20px #192b4826;
+  background:linear-gradient(135deg,#ffffff09,#ffffff01);
+  -webkit-user-select:none;
+  user-select:none
+}
+.glass::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  box-shadow:inset 0 -1px 1px #ffffff21;
+  pointer-events:none
+}
+.glass:active {
+  border-color:#ffffff90
+}
+.lens {
+  width:144px;
+  height:144px;
+  border-radius:50%;
+  left:65%;
+  top:27%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:9px;
+  cursor:grab;
+  touch-action:none;
+  box-shadow:inset 1px 1px 2px #ffffff6e,inset -1px -2px 5px #ffffff16,0 14px 28px #18324c30
+}
+.lens:active,.orb:active {
+  cursor:grabbing
+}
+.lens>svg {
+  width:22px;
+  height:22px;
+  opacity:.9
+}
+.lens>span {
+  font-size:9px;
+  letter-spacing:1px;
+  color:#ffffffc2
+}
+.player {
+  left:26px;
+  bottom:120px;
+  width:302px;
+  height:82px;
+  border-radius:28px;
+  display:flex;
+  align-items:center;
+  padding:12px;
+  gap:12px
+}
+.album-art {
+  width:56px;
+  height:56px;
+  flex-shrink:0;
+  border-radius:15px;
+  background:radial-gradient(ellipse at 80% 20%,#eac18f 0,transparent 55%),linear-gradient(145deg,#4d787e 0,#b4cdd0 55%,#293c47 100%);
+  display:flex;
+  align-items:flex-end;
+  padding:8px;
+  font-size:10px;
+  line-height:1;
+  letter-spacing:-.3px;
+  box-shadow:0 2px 7px #243d4840
+}
+.track-info {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:0
+}
+.track-info strong {
+  font-size:12px;
+  font-weight:550;
+  letter-spacing:.2px
+}
+.track-info>span {
+  font-size:9px;
+  color:#ffffffa6;
+  white-space:nowrap
+}
+.play-button {
+  width:40px;
+  height:40px;
+  margin-left:auto;
+  flex-shrink:0;
+  display:grid;
+  place-items:center;
+  background:#ffffff20;
+  border:1px solid #ffffff30;
+  border-radius:50%
+}
+.play-button svg {
+  width:17px;
+  height:17px;
+  fill:currentColor;
+  stroke-width:1
+}
+.volume-control {
+  right:26px;
+  bottom:136px;
+  width:178px;
+  height:49px;
+  display:flex;
+  align-items:center;
+  padding:0 14px;
+  gap:10px;
+  border-radius:26px
+}
+.volume-control>svg {
+  width:16px;
+  height:16px
+}
+.volume-control output {
+  font-size:9px;
+  width:15px
+}
+.volume-control input {
+  min-width:0;
+  flex:1;
+  --track-fill:#ffffffaa;
+  --track-empty:#ffffff32
+}
+.dock {
+  width:286px;
+  height:67px;
+  left:50%;
+  bottom:32px;
+  transform:translateX(-50%);
+  border-radius:34px;
+  padding:6px;
+  display:flex;
+  align-items:center;
+  gap:4px
+}
+.dock button {
+  z-index:1;
+  flex:1;
+  height:54px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:3px;
+  color:#ffffff9e;
+  border-radius:28px;
+  transition:color .2s;
+  font-size:8px
+}
+.dock button.active {
+  color:#fff
+}
+.dock button svg {
+  width:21px;
+  height:21px
+}
+.dock-indicator {
+  position:absolute;
+  left:6px;
+  top:6px;
+  width:88px;
+  height:53px;
+  border-radius:27px;
+  background:linear-gradient(145deg,#ffffff32,#ffffff14);
+  border:1px solid #ffffff20;
+  box-shadow:inset 0 1px 2px #ffffff20;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1);
+  pointer-events:none
+}
+.favorite {
+  bottom:34px;
+  right:26px;
+  width:63px;
+  height:63px;
+  border-radius:50%;
+  display:grid;
+  place-items:center
+}
+.favorite.saved {
+  color:#ffe5cf
+}
+.favorite svg {
+  width:24px;
+  height:24px
+}
+.canvas-hint {
+  position:absolute;
+  bottom:12px;
+  left:0;
+  width:100%;
+  text-align:center;
+  font-size:8px;
+  letter-spacing:1px;
+  color:#ffffff58;
+  pointer-events:none
+}
+.preview-footer {
+  display:flex;
+  justify-content:space-between;
+  margin:16px 2px 0;
+  font-size:9px;
+  color:#a5aab6;
+  gap:8px
+}
+.preview-footer>span:first-child {
+  display:flex;
+  align-items:center;
+  gap:6px
+}
+.preview-footer svg {
+  width:12px;
+  height:12px
+}
+#renderer-status {
+  font:9px ui-monospace,SFMono-Regular,monospace;
+  color:#a0a7b4
+}
+.inspector {
+  border-left:1px solid var(--line);
+  padding:24px 23px;
+  background:linear-gradient(100deg,#fcfcfe,#fff)
+}
+.inspector-heading {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:26px
+}
+.inspector-heading h2 {
+  font-size:14px;
+  font-weight:550;
+  margin:0 0 6px
+}
+.inspector-heading>div>span {
+  font-size:7px;
+  letter-spacing:1.5px;
+  color:#a3a9b6
+}
+.icon-button {
+  width:29px;
+  height:29px;
+  border-radius:7px;
+  display:grid;
+  place-items:center;
+  color:#959dad
+}
+.icon-button:hover {
+  background:#e9edf4;
+  color:#586be8
+}
+.icon-button svg {
+  width:15px;
+  height:15px
+}
+fieldset {
+  border:0;
+  padding:0;
+  margin:0
+}
+legend {
+  font-size:10px;
+  color:#818898;
+  padding:0
+}
+.presets {
+  display:flex;
+  background:#eef0f5;
+  padding:3px;
+  border-radius:8px;
+  margin:10px 0 22px
+}
+.presets button {
+  flex:1;
+  font-size:10px;
+  border-radius:5px;
+  height:27px;
+  color:#9299a9
+}
+.presets button.selected {
+  background:#fff;
+  box-shadow:0 1px 5px #22355012;
+  color:#525f82
+}
+.slider-group {
+  margin-bottom:20px
+}
+.slider-group label {
+  font-size:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+  color:#747e90
+}
+.slider-group output {
+  font-size:11px;
+  font-variant-numeric:tabular-nums;
+  color:#596379
+}
+.slider-group output span {
+  font-size:8px;
+  color:#a7adba;
+  margin-left:3px
+}
+input[type=range] {
+  appearance:none;
+  -webkit-appearance:none;
+  display:block;
+  width:100%;
+  height:4px;
+  border-radius:10px;
+  cursor:pointer;
+  background:linear-gradient(to right,var(--track-fill,#7987b5) 0 var(--progress,50%),var(--track-empty,#e6eaf2) var(--progress,50%) 100%);
+  outline-offset:6px;
+  margin:8px 0;
+  touch-action:pan-y
+}
+input[type=range]::-webkit-slider-thumb {
+  appearance:none;
+  -webkit-appearance:none;
+  width:13px;
+  height:13px;
+  background:#fff;
+  border-radius:50%;
+  border:1px solid #e1e6ef;
+  box-shadow:0 1px 4px #203b7326
+}
+input[type=range]::-moz-range-thumb {
+  width:12px;
+  height:12px;
+  background:#fff;
+  border-radius:50%;
+  border:1px solid #e1e6ef;
+  box-shadow:0 1px 4px #203b7326
+}
+.range-ends {
+  display:flex;
+  justify-content:space-between;
+  font-size:8px;
+  color:#b0b6c2;
+  margin-top:11px
+}
+.slider-group.compact {
+  margin-bottom:22px
+}
+.color-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:10px;
+  color:#747e90
+}
+.swatches {
+  display:flex;
+  gap:9px
+}
+.swatches button {
+  width:17px;
+  height:17px;
+  border-radius:50%;
+  background:var(--swatch);
+  border:1px solid #253e5b0a
+}
+.swatches button.selected {
+  outline:1px solid #7987ae;
+  outline-offset:3px
+}
+.inspector-divider {
+  height:1px;
+  background:var(--line);
+  margin:21px 0
+}
+.toggle-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:16px 0;
+  gap:8px
+}
+.toggle-row label {
+  font-size:10px;
+  color:#6d7688;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  cursor:pointer
+}
+.toggle-row label span {
+  font-size:8px;
+  color:#a9afbc
+}
+input[type=checkbox][role=switch] {
+  appearance:none;
+  -webkit-appearance:none;
+  width:29px;
+  height:17px;
+  flex-shrink:0;
+  border-radius:12px;
+  background:#dfe3eb;
+  position:relative;
+  cursor:pointer;
+  margin:0;
+  transition:background .2s
+}
+input[type=checkbox][role=switch]:checked {
+  background:#8b9bc8
+}
+input[type=checkbox][role=switch]::after {
+  content:"";
+  position:absolute;
+  width:13px;
+  height:13px;
+  left:2px;
+  top:2px;
+  border-radius:50%;
+  background:white;
+  box-shadow:0 1px 3px #1112;
+  transition:transform .2s
+}
+input[type=checkbox][role=switch]:checked::after {
+  transform:translateX(12px)
+}
+.background-options {
+  display:flex;
+  gap:9px;
+  margin:11px 0 22px
+}
+.bg-option {
+  height:48px;
+  flex:1;
+  border-radius:6px;
+  position:relative;
+  overflow:hidden
+}
+.bg-option span {
+  position:absolute;
+  bottom:5px;
+  left:0;
+  width:100%;
+  text-align:center;
+  color:white;
+  text-shadow:0 1px 3px #0008;
+  font-size:8px
+}
+.bg-option.selected {
+  outline:2px solid #8493c0;
+  outline-offset:3px
+}
+.coast {
+  background:linear-gradient(160deg,#86a9b0 20%,#cfcec0 50%,#435c68 51%,#a2c9c8 68%,#d5b790 70%,#ba815e)
+}
+.aurora {
+  background:radial-gradient(ellipse at 70% 70%,#e5b0df,transparent 50%),linear-gradient(150deg,#1b2b59,#8993db 50%,#72b0b5)
+}
+.grid {
+  background-color:#657980;
+  background-image:linear-gradient(#fff3 1px,transparent 1px),linear-gradient(90deg,#fff3 1px,transparent 1px);
+  background-size:12px 12px
+}
+.export-button {
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  font-size:10px;
+  border:1px solid #e5e8f0;
+  background:#f8f9fc;
+  border-radius:8px;
+  height:35px;
+  color:#7f89a0
+}
+.export-button svg {
+  width:13px;
+  height:13px
+}
+.export-button svg:last-child {
+  margin-left:auto;
+  width:11px
+}
+.export-button svg:first-child {
+  margin-right:auto
+}
+.export-button:hover {
+  background:#eef1f9
+}
+.details-strip {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:30px;
+  margin:27px 0
+}
+.detail-item {
+  display:flex;
+  align-items:center;
+  gap:13px;
+  text-align:left;
+  padding:7px 0;
+  position:relative
+}
+.detail-item+ .detail-item {
+  border-left:1px solid #e4e7ee;
+  padding-left:29px
+}
+.detail-number {
+  font:10px ui-monospace,SFMono-Regular,monospace;
+  color:#b5bdcd;
+  align-self:flex-start;
+  margin-top:4px
+}
+.detail-item h3 {
+  font-size:11px;
+  font-weight:550;
+  color:#626c80;
+  margin:0 0 7px
+}
+.detail-item p {
+  font-size:9px;
+  color:#a0a7b5;
+  margin:0;
+  line-height:1.5
+}
+.detail-item h3 svg {
+  width:10px;
+  height:10px;
+  margin-left:3px;
+  vertical-align:middle
+}
+.detail-item>span:last-child {
+  margin-left:auto;
+  flex-shrink:0;
+  margin-right:10px
+}
+.mini-lens {
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,#fff,#ecf1f7 55%,#a7b9cd 95%);
+  border:1px solid #d2dce8;
+  box-shadow:2px 4px 7px #17244715
+}
+.mini-shine {
+  width:37px;
+  height:29px;
+  border-radius:12px;
+  background:linear-gradient(145deg,#fff 20%,#e3e9f2);
+  border:1px solid #d4dce8;
+  box-shadow:inset 0 1px 1px white,2px 3px 5px #243b5a0c
+}
+.mini-merge {
+  position:relative;
+  width:43px;
+  height:29px;
+  filter:drop-shadow(0 2px 2px #cbd3e299)
+}
+.mini-merge::before,.mini-merge::after {
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#fff,#dde5ee);
+  border:1px solid #dce4ed
+}
+.mini-merge::after {
+  left:18px;
+  top:7px;
+  width:20px;
+  height:20px
+}
+.merge-card:hover h3 {
+  color:#526bc6
+}
+.site-footer {
+  display:flex;
+  justify-content:space-between;
+  border-top:1px solid var(--line);
+  padding:20px 0 24px;
+  color:#a8aebb;
+  font-size:8px;
+  letter-spacing:.55px
+}
+.footer-dot {
+  margin:0 10px;
+  color:#c2c7d1
+}
+dialog {
+  border:1px solid #fff9;
+  box-shadow:0 30px 100px #17243d40;
+  border-radius:22px;
+  padding:28px;
+  width:min(600px,calc(100% - 32px));
+  color:#3c4657;
+  background:#f9fafdfa;
+  max-height:90vh;
+  overflow:auto
+}
+dialog::backdrop {
+  background:#15233a55;
+  backdrop-filter:blur(8px)
+}
+.dialog-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between
+}
+.dialog-heading+.h2,dialog h2 {
+  font-size:25px;
+  letter-spacing:-.7px;
+  font-weight:550;
+  margin:18px 0 10px
+}
+dialog>p {
+  font-size:12px;
+  color:#8790a2;
+  line-height:1.8
+}
+dialog ol {
+  padding-left:23px;
+  margin:24px 0
+}
+dialog li {
+  padding:0 0 17px 7px;
+  font-size:12px;
+  color:#8e9cba
+}
+dialog li strong {
+  display:block;
+  color:#4e5c73;
+  margin-bottom:6px;
+  font-weight:550
+}
+dialog li span {
+  line-height:1.8;
+  font-size:11px;
+  color:#8790a2
+}
+.formula {
+  font:11px ui-monospace,monospace;
+  background:#eaf0f8;
+  padding:16px;
+  border-radius:10px;
+  overflow-wrap:anywhere
+}
+.source-links a {
+  color:#6e83b5
+}
+.merge-stage {
+  height:310px;
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border-radius:13px;
+  background:#628898;
+  margin-top:20px
+}
+.orb {
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  top:95px;
+  display:grid;
+  place-items:center;
+  cursor:grab;
+  touch-action:none;
+  border-color:transparent;
+  box-shadow:none
+}
+.orb-a {
+  left:calc(50% - 115px)
+}
+.orb-b {
+  left:calc(50% - 5px)
+}
+.orb svg {
+  opacity:.65
+}
+.merge-range {
+  display:flex;
+  align-items:center;
+  gap:16px;
+  font-size:11px;
+  color:#7d889e;
+  margin:24px 0 4px
+}
+.merge-range input {
+  flex:1
+}
+.merge-range output {
+  min-width:35px;
+  font-size:10px
+}
+.toast {
+  position:fixed;
+  bottom:26px;
+  left:50%;
+  transform:translate(-50%,15px);
+  opacity:0;
+  pointer-events:none;
+  padding:12px 20px;
+  border-radius:12px;
+  background:#26364fee;
+  backdrop-filter:blur(15px);
+  color:#fff;
+  font-size:12px;
+  box-shadow:0 8px 25px #162b4929;
+  transition:opacity .2s,transform .2s;
+  z-index:10;
+  max-width:90vw;
+  white-space:pre-line
+}
+.toast.visible {
+  opacity:1;
+  transform:translate(-50%,0)
+}
+.stage[data-theme=grid] .scene-description {
+  color:white
+}
+.fallback .glass {
+  background:#ffffff28;
+  backdrop-filter:blur(var(--fallback-blur,5px));
+  -webkit-backdrop-filter:blur(var(--fallback-blur,5px))
+}
+@media(min-width:1450px) {
+  .stage {
+    height:568px
+  }
+  .inspector {
+    padding-top:26px
+  }
+  .workspace {
+    grid-template-columns:minmax(0,1fr) 288px
+  }
+}
+@media(max-width:1150px) {
+  .site-header {
+    padding:0 32px
+  }
+  main {
+    padding:35px 32px 0
+  }
+  .workspace {
+    grid-template-columns:minmax(0,1fr) 250px
+  }
+  .inspector {
+    padding:23px 19px
+  }
+  .preview-column {
+    padding:17px
+  }
+  .preview-toolbar {
+    gap:8px
+  }
+  .preview-title {
+    font-size:10px
+  }
+  #scene-name {
+    display:none
+  }
+  .segmented button {
+    padding:6px 9px
+  }
+  .stage {
+    height:550px
+  }
+  .player {
+    width:267px;
+    left:20px
+  }
+  .volume-control {
+    right:20px;
+    width:143px;
+    bottom:217px
+  }
+  .favorite {
+    right:20px
+  }
+  .detail-item>span:last-child {
+    display:none
+  }
+  .details-strip {
+    gap:20px
+  }
+  .detail-item+.detail-item {
+    padding-left:20px
+  }
+}
+@media(max-width:870px) {
+  .site-header {
+    padding:0 24px;
+    height:74px
+  }
+  main {
+    padding:30px 24px 0
+  }
+  .intro {
+    margin-bottom:28px
+  }
+  .intro-note {
+    display:none
+  }
+  h1 {
+    font-size:36px
+  }
+  .workspace {
+    grid-template-columns:minmax(0,1fr)
+  }
+  .inspector {
+    border-left:0;
+    border-top:1px solid var(--line);
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    column-gap:28px;
+    padding:25px
+  }
+  .inspector-heading {
+    grid-column:1 / -1;
+    margin-bottom:20px
+  }
+  .preset-field {
+    grid-column:1 / -1
+  }
+  .presets {
+    margin-bottom:24px
+  }
+  .inspector-divider {
+    display:none
+  }
+  .color-row {
+    margin-bottom:20px
+  }
+  .toggle-row {
+    margin:0 0 20px
+  }
+  .background-field {
+    grid-column:1 / -1
+  }
+  .background-options {
+    margin-bottom:20px
+  }
+  .bg-option {
+    height:55px
+  }
+  .export-button {
+    grid-column:1 / -1
+  }
+  .stage {
+    height:530px
+  }
+  .volume-control {
+    bottom:136px;
+    width:165px
+  }
+  .player {
+    width:302px
+  }
+  .preview-title #scene-name {
+    display:inline
+  }
+  .details-strip {
+    gap:16px
+  }
+  .detail-item {
+    gap:8px
+  }
+  .detail-item+.detail-item {
+    padding-left:15px
+  }
+  .detail-item p {
+    font-size:8px
+  }
+  .native-badge {
+    display:none
+  }
+  .header-right {
+    gap:10px
+  }
+}
+@media(max-width:540px) {
+  .site-header {
+    padding:0 20px;
+    height:70px
+  }
+  .brand-divider {
+    margin:0 12px
+  }
+  .brand-note {
+    font-size:10px;
+    letter-spacing:0
+  }
+  .wordmark {
+    font-size:25px
+  }
+  .brand-symbol {
+    width:30px;
+    height:34px
+  }
+  .header-right .text-button {
+    font-size:10px;
+    gap:6px
+  }
+  main {
+    padding:27px 16px 0
+  }
+  .eyebrow {
+    font-size:8px;
+    letter-spacing:1.5px
+  }
+  .intro {
+    padding:0 4px;
+    margin-bottom:25px
+  }
+  h1 {
+    font-size:34px;
+    margin:14px 0 13px
+  }
+  .intro p {
+    font-size:11px;
+    letter-spacing:0
+  }
+  .workspace {
+    border-radius:15px
+  }
+  .preview-column {
+    padding:11px
+  }
+  .preview-toolbar {
+    height:auto;
+    margin:4px 2px 13px;
+    gap:5px
+  }
+  .preview-title {
+    font-size:9px;
+    gap:5px
+  }
+  .preview-title #scene-name,.preview-title .muted {
+    display:none
+  }
+  .segmented {
+    padding:2px;
+    border-radius:6px
+  }
+  .segmented button {
+    font-size:8px;
+    padding:6px 7px
+  }
+  .stage {
+    height:505px;
+    border-radius:10px
+  }
+  .stage-top {
+    left:19px;
+    right:19px;
+    top:21px
+  }
+  .scene-index {
+    font-size:7px;
+    letter-spacing:1.3px
+  }
+  .weather {
+    font-size:16px
+  }
+  .weather>span {
+    display:none
+  }
+  .lens {
+    width:118px;
+    height:118px;
+    left:58%;
+    top:25%
+  }
+  .scene-description {
+    left:22px;
+    top:55%;
+    gap:8px
+  }
+  .scene-description>span:first-child {
+    font-size:10px
+  }
+  .scene-coordinates {
+    font-size:7px
+  }
+  .player {
+    left:17px;
+    bottom:127px;
+    width:calc(100% - 34px);
+    height:76px;
+    border-radius:26px;
+    padding:10px
+  }
+  .album-art {
+    width:53px;
+    height:53px
+  }
+  .volume-control {
+    display:none
+  }
+  .dock {
+    width:235px;
+    height:62px;
+    left:17px;
+    transform:none;
+    bottom:43px;
+    padding:5px
+  }
+  .dock-indicator {
+    left:5px;
+    top:5px;
+    width:72px;
+    height:51px
+  }
+  .dock button {
+    height:50px;
+    font-size:7px
+  }
+  .dock button svg {
+    width:19px;
+    height:19px
+  }
+  .favorite {
+    width:53px;
+    height:53px;
+    bottom:47px;
+    right:17px
+  }
+  .canvas-hint {
+    bottom:19px
+  }
+  .preview-footer {
+    font-size:8px;
+    gap:5px;
+    margin:13px 1px 3px
+  }
+  .preview-footer svg {
+    width:10px;
+    height:10px
+  }
+  #renderer-status {
+    font-size:7px
+  }
+  .inspector {
+    padding:21px;
+    column-gap:23px
+  }
+  .inspector-heading h2 {
+    font-size:13px
+  }
+  .slider-group label {
+    font-size:10px
+  }
+  .toggle-row label {
+    font-size:9px
+  }
+  .toggle-row label span {
+    font-size:7px
+  }
+  .swatches {
+    gap:7px
+  }
+  .swatches button {
+    width:14px;
+    height:14px
+  }
+  .color-row {
+    font-size:9px
+  }
+  .details-strip {
+    grid-template-columns:1fr;
+    gap:0;
+    margin:15px 7px
+  }
+  .detail-item {
+    padding:16px 0;
+    gap:14px
+  }
+  .detail-item+.detail-item {
+    border-left:0;
+    border-top:1px solid var(--line);
+    padding:16px 0
+  }
+  .detail-item p {
+    font-size:10px
+  }
+  .detail-item h3 {
+    font-size:12px
+  }
+  .detail-item>span:last-child {
+    display:block
+  }
+  .site-footer {
+    padding:18px 6px 24px;
+    font-size:7px
+  }
+  .site-footer>span:last-child {
+    display:none
+  }
+  .merge-stage {
+    height:280px
+  }
+  .orb {
+    width:100px;
+    height:100px;
+    top:90px
+  }
+  .orb-a {
+    left:calc(50% - 95px)
+  }
+  .orb-b {
+    left:calc(50% - 5px)
+  }
+  dialog {
+    padding:22px
+  }
+  .merge-range {
+    gap:10px
+  }
+}
+@media(max-width:370px) {
+  .brand-note,.brand-divider {
+    display:none
+  }
+  .dock {
+    width:210px
+  }
+  .favorite {
+    right:13px
+  }
+  .inspector {
+    padding:20px 15px;
+    column-gap:18px
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after {
+    scroll-behavior:auto!important;
+    transition:none!important;
+    animation:none!important
+  }
+}
+/* Let the scene fill the inspector height on wide layouts. */
+@media(min-width:871px) {
+  .preview-column {
+    display:flex;
+    flex-direction:column
+  }
+  .preview-toolbar,.preview-footer {
+    flex-shrink:0
+  }
+  .stage {
+    flex:1;
+    min-height:544px
+  }
+}
+@media(min-width:1450px) {
+  .stage {
+    min-height:568px
+  }
+}
+@media(max-width:540px) {
+  .dock {
+    width:calc(100% - 99px)
+  }
+  .lens {
+    left:min(58%,calc(100% - 130px))
+  }
+}
+@media(max-width:370px) {
+  .dock {
+    width:calc(100% - 91px)
+  }
+}
+
+</style>
+  
+  
+</head>
+<body>
+  <svg class="icon-defs" aria-hidden="true"><defs>
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3C9 8 5.5 11 5.5 15a6.5 6.5 0 0 0 13 0C18.5 11 15 8 12 3Z"/><path d="M8.5 15a3.5 3.5 0 0 0 3.5 3.5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M6 18 18 6M6 6h12v12"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m7 7-5 5 5 5M17 7l5 5-5 5M14 4l-4 16"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="m11 4-6 5H2v6h3l6 5ZM15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H3ZM9 20v-7h6v7"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m16 8-2 6-6 2 2-6Z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20 5c-3-3-7-1-8 1-1-2-5-4-8-1-5 5 2 10 8 15 6-5 13-10 8-15Z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v2M12 21v2M1 12h2M21 12h2M4 4l2 2M18 18l2 2M4 20l2-2M18 6l2-2"/></symbol>
+    <symbol id="i-move" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M8 7l4-4 4 4M8 17l4 4 4-4M7 8l-4 4 4 4M17 8l4 4-4 4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+  </defs></svg>
+  <header class="site-header">
+    <a class="wordmark" href="#" aria-label="Liquid 实验室首页"><span class="brand-symbol"><svg><use href="#i-drop"/></svg></span>liquid<span class="wordmark-dot">.</span><span class="brand-divider"></span><span class="brand-note">交互材质实验室</span></a>
+    <div class="header-right"><span class="native-badge"><i></i>原生 Web · 零依赖</span><button class="text-button" id="open-code"><svg><use href="#i-code"/></svg>查看原理</button></div>
+  </header>
+  <main>
+    <section class="intro"><div><div class="eyebrow">EXPERIMENT 001 <span>/</span> LIQUID GLASS</div><h1>让界面，轻一点<span>。</span></h1><p>折射光线，留住内容。探索一块玻璃的无限可能。</p></div><div class="intro-note"><span>Inspired by WWDC25</span><span>Designed for the web <svg><use href="#i-arrow"/></svg></span></div></section>
+    <section class="workspace" aria-label="液态玻璃交互实验室">
+      <div class="preview-column">
+        <div class="preview-toolbar"><div class="preview-title"><span class="live-dot"></span>实时画布 <span class="muted">/</span> <span id="scene-name">海岸晨光</span></div><div class="segmented" aria-label="预览模式"><button class="selected" data-mode="glass" aria-pressed="true">液态玻璃</button><button data-mode="frosted" aria-pressed="false">普通毛玻璃</button><button data-mode="map" aria-pressed="false" title="R 通道控制水平，G 通道控制垂直采样">置换场</button></div></div>
+        <div class="stage" id="stage">
+          <canvas id="glass-canvas" aria-label="实时渲染的玻璃折射背景"></canvas>
+          <div class="stage-top"><span class="scene-index">01 / COASTLINE</span><span class="weather"><svg><use href="#i-sun"/></svg> 18° <span>静好的一天</span></span></div>
+          <div class="scene-description"><span id="scene-description">在光与海之间，慢下来。</span><span class="scene-coordinates">36°16′ N &nbsp; 121°48′ W</span></div>
+          <button class="glass lens" id="lens" data-glass data-radius="72" aria-label="可拖动透镜，使用方向键移动"><svg><use href="#i-move"/></svg><span>拖动探索</span></button>
+          <div class="glass player" data-glass data-radius="28"><div class="album-art"><span>soft<br>focus.</span></div><div class="track-info"><strong id="track-name">Ocean Air</strong><span id="track-status">合成氛围音 · 点击播放</span></div><button class="play-button" id="play" aria-label="播放氛围音" aria-pressed="false"><svg><use href="#i-play"/></svg></button></div>
+          <div class="glass volume-control" data-glass data-radius="26"><svg><use href="#i-volume"/></svg><input id="volume" type="range" min="0" max="100" value="32" aria-label="音量"><output id="volume-value" for="volume">32</output></div>
+          <nav class="glass dock" data-glass data-radius="34" aria-label="场景导航"><span class="dock-indicator" aria-hidden="true"></span><button class="active" data-view="home" aria-label="首页" aria-pressed="true"><svg><use href="#i-home"/></svg><span>首页</span></button><button data-view="explore" aria-label="探索" aria-pressed="false"><svg><use href="#i-compass"/></svg><span>探索</span></button><button data-view="favorites" aria-label="收藏" aria-pressed="false"><svg><use href="#i-heart"/></svg><span>收藏</span></button></nav>
+          <button class="glass favorite" data-glass data-radius="32" id="favorite" aria-label="收藏当前场景" aria-pressed="false"><svg><use href="#i-plus"/></svg></button>
+          <span class="canvas-hint">移动光标，观察光线流转</span>
+        </div>
+        <div class="preview-footer"><span><svg><use href="#i-move"/></svg>拖动圆形透镜，观察背景折射</span><span id="renderer-status">正在初始化渲染器</span></div>
+      </div>
+      <aside class="inspector" aria-label="玻璃材质参数">
+        <div class="inspector-heading"><div><h2>材质调校</h2><span>MATERIAL PROPERTIES</span></div><button class="icon-button" id="reset" aria-label="恢复默认参数" title="恢复默认参数"><svg><use href="#i-reset"/></svg></button></div>
+        <fieldset class="preset-field"><legend>材质预设</legend><div class="presets"><button data-preset="clear" class="selected" aria-pressed="true">清透</button><button data-preset="soft" aria-pressed="false">柔雾</button><button data-preset="strong" aria-pressed="false">水晶</button></div></fieldset>
+        <div class="slider-group"><label for="refraction">折射强度 <output id="refraction-value">55<span>%</span></output></label><input id="refraction" type="range" min="0" max="100" value="55"><div class="range-ends"><span>平静</span><span>流动</span></div></div>
+        <div class="slider-group"><label for="blur">背景模糊 <output id="blur-value">2.0<span>px</span></output></label><input id="blur" type="range" min="0" max="16" step="0.5" value="2"><div class="range-ends"><span>清晰</span><span>朦胧</span></div></div>
+        <div class="slider-group compact"><label for="shine">边缘高光 <output id="shine-value">65<span>%</span></output></label><input id="shine" type="range" min="0" max="100" value="65"></div>
+        <div class="slider-group compact"><label for="tint">染色浓度 <output id="tint-value">12<span>%</span></output></label><input id="tint" type="range" min="0" max="60" value="12"></div>
+        <div class="color-row"><span>玻璃色调</span><div class="swatches" aria-label="玻璃色调"><button style="--swatch:#ecf4ff" data-color="#ecf4ff" class="selected" aria-label="冰白" aria-pressed="true"></button><button style="--swatch:#b8d5ef" data-color="#b8d5ef" aria-label="海蓝" aria-pressed="false"></button><button style="--swatch:#ddc8e8" data-color="#ddc8e8" aria-label="浅紫" aria-pressed="false"></button><button style="--swatch:#ecc7ba" data-color="#ecc7ba" aria-label="暖杏" aria-pressed="false"></button></div></div>
+        <div class="inspector-divider"></div>
+        <div class="toggle-row"><label for="follow-light">光线跟随<span>高光随光标位置变化</span></label><input type="checkbox" role="switch" id="follow-light" checked></div>
+        <div class="toggle-row"><label for="adaptive">自适应可读性<span>按玻璃面积增加模糊</span></label><input type="checkbox" role="switch" id="adaptive"></div>
+        <div class="inspector-divider"></div>
+        <fieldset class="background-field"><legend>切换背景</legend><div class="background-options"><button class="bg-option coast selected" data-scene="coast" aria-label="海岸晨光" aria-pressed="true"><span>晨光</span></button><button class="bg-option aurora" data-scene="aurora" aria-label="流动极光" aria-pressed="false"><span>极光</span></button><button class="bg-option grid" data-scene="grid" aria-label="折射测试网格" aria-pressed="false"><span>网格</span></button></div></fieldset>
+        <button class="export-button" id="export-config"><svg><use href="#i-code"/></svg>复制材质参数<svg><use href="#i-arrow"/></svg></button>
+      </aside>
+    </section>
+    <section class="details-strip" aria-label="实现特性">
+      <div class="detail-item"><span class="detail-number">01</span><div><h3>真正的背景置换</h3><p>以二维采样场弯折画面，构成透镜感。</p></div><span class="mini-lens" aria-hidden="true"></span></div>
+      <div class="detail-item"><span class="detail-number">02</span><div><h3>随形而动的光</h3><p>从圆角轮廓计算法线，生成边缘高光。</p></div><span class="mini-shine" aria-hidden="true"></span></div>
+      <button class="detail-item merge-card" id="merge-open"><span class="detail-number">03</span><div><h3>像液体一样相融 <svg><use href="#i-arrow"/></svg></h3><p>打开融球实验，拖动两个玻璃圆球。</p></div><span class="mini-merge" aria-hidden="true"></span></button>
+    </section>
+    <footer class="site-footer"><span>LIQUID LAB <span class="footer-dot">·</span> A study in light & interaction.</span><span>HTML / CSS / WEBGL <span class="footer-dot">·</span> 2026</span></footer>
+  </main>
+  <dialog id="code-dialog"><div class="dialog-heading"><span class="eyebrow">UNDER THE SURFACE</span><button class="icon-button dialog-close" aria-label="关闭原理说明"><svg><use href="#i-close"/></svg></button></div><h2>一块玻璃，四层计算。</h2><p>这是基于你提供的分析制作的 Web 近似实现，不代表苹果公开了其内部渲染方式。</p><ol><li><strong>准备背景纹理</strong><span>Canvas 2D 绘制场景，WebGL 读取同一份像素。控件文字由原生 DOM 绘制，保持清晰可操作。</span></li><li><strong>构建置换场</strong><span>圆角矩形的有符号距离场（SDF）决定边缘宽度与法线。中心轻微缩放、边缘反向拉伸；红色与绿色分别表示 X / Y 采样偏移。</span></li><li><strong>折射、模糊与染色</strong><span>以偏移后的坐标采样背景，再进行九点模糊、轻微色散与色调混合。当前版本只折射画布场景，不会自动抓取任意网页 DOM。</span></li><li><strong>光照与融合</strong><span>轮廓法线与光源方向计算高光；融球实验以平滑最小值合并距离场。交互时按需重绘，尊重系统减少动态效果设置。</span></li></ol><div class="formula">sampleUV = uv + displacement / resolution</div><p class="source-links">技术参考：<a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/feDisplacementMap" target="_blank" rel="noreferrer">MDN · 置换映射</a> / <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL" target="_blank" rel="noreferrer">WebGL 纹理</a></p></dialog>
+  <dialog id="merge-dialog"><div class="dialog-heading"><span class="eyebrow">EXPERIMENT 002 / METABALLS</span><button class="icon-button dialog-close" aria-label="关闭融球实验"><svg><use href="#i-close"/></svg></button></div><h2>靠近，然后相融。</h2><p>拖动任意圆球，或聚焦后使用方向键。边缘在接近时自然连接。</p><div class="merge-stage" id="merge-stage"><canvas id="merge-canvas" aria-label="融球效果背景"></canvas><button class="glass orb orb-a" data-glass data-radius="60" data-merge="1" aria-label="玻璃圆球 A，可用方向键移动"><svg><use href="#i-move"/></svg></button><button class="glass orb orb-b" data-glass data-radius="60" data-merge="1" aria-label="玻璃圆球 B，可用方向键移动"><svg><use href="#i-move"/></svg></button></div><label class="merge-range" for="fusion">融合范围<input type="range" id="fusion" min="1" max="80" value="36"><output id="fusion-value">36px</output></label></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+/* LiquidGlass — native WebGL 1 material renderer. No DOM screenshotting.
+ * Give the renderer a canvas scene; DOM elements supply accessible controls
+ * and their screen-space rounded rectangles. Rendering is event-driven.
+ */
+(() => {
+  'use strict';
+  const MAX_SHAPES = 16;
+  const vertex = `attribute vec2 a_position;
+    void main(){gl_Position=vec4(a_position,0.0,1.0);}`;
+  const fragment = `precision highp float;
+    uniform sampler2D u_scene;
+    uniform vec2 u_resolution;
+    uniform float u_dpr;
+    uniform vec4 u_rects[16];
+    uniform float u_radii[16];
+    uniform int u_count;
+    uniform float u_refraction, u_blur, u_shine, u_tint, u_mode, u_fusion;
+    uniform vec3 u_color;
+    uniform vec2 u_light;
+
+    // Rounded-rectangle signed distance and its analytic gradient.
+    float roundedRect(vec2 p, vec4 rect, float radius, out vec2 normal){
+      vec2 local = p - rect.xy;
+      vec2 q = abs(local) - rect.zw * 0.5 + radius;
+      vec2 outside = max(q, 0.0);
+      float len = length(outside);
+      normal = len > 0.001 ? outside / len * sign(local) :
+        (q.x > q.y ? vec2(sign(local.x),0.0) : vec2(0.0,sign(local.y)));
+      return len + min(max(q.x,q.y),0.0) - radius;
+    }
+    vec4 scene(vec2 p){return texture2D(u_scene,clamp(p/u_resolution,vec2(0.001),vec2(0.999)));}
+    vec3 blurred(vec2 p,float blur){
+      vec3 c = scene(p).rgb * 0.25;
+      c += scene(p+vec2(blur,0.0)).rgb * 0.125;
+      c += scene(p-vec2(blur,0.0)).rgb * 0.125;
+      c += scene(p+vec2(0.0,blur)).rgb * 0.125;
+      c += scene(p-vec2(0.0,blur)).rgb * 0.125;
+      c += scene(p+vec2(blur,blur)).rgb * 0.0625;
+      c += scene(p+vec2(-blur,blur)).rgb * 0.0625;
+      c += scene(p+vec2(blur,-blur)).rgb * 0.0625;
+      c += scene(p-vec2(blur,blur)).rgb * 0.0625;
+      return c;
+    }
+    void main(){
+      vec2 p=vec2(gl_FragCoord.x/u_dpr,u_resolution.y-gl_FragCoord.y/u_dpr);
+      vec3 base=scene(p).rgb;
+      float d=10000.0;
+      vec2 n=vec2(0.0),center=vec2(0.0);
+      for(int i=0;i<16;i++){
+        if(i>=u_count)break;
+        vec2 nn;
+        float dd=roundedRect(p,u_rects[i],u_radii[i],nn);
+        if(u_fusion>0.0 && i>0){
+          float h=clamp(0.5+0.5*(dd-d)/u_fusion,0.0,1.0);
+          d=mix(dd,d,h)-u_fusion*h*(1.0-h);
+          n=mix(nn,n,h);
+          center=mix(u_rects[i].xy,center,h);
+        }else if(dd<d){d=dd;n=nn;center=u_rects[i].xy;}
+      }
+      if(d>1.0){gl_FragColor=vec4(base,1.0);return;}
+      n=normalize(n+vec2(0.00001));
+      float inside=max(-d,0.0);
+      float bevel=1.0-smoothstep(0.0,24.0,inside);
+      float amount=u_mode==1.0?0.0:u_refraction;
+      // The center samples outward (compression); the rim reverses the
+      // offset (magnification). Together these form a controllable 2D lens.
+      vec2 displacement=(p-center)*0.045*amount*(1.0-bevel)
+        -n*pow(bevel,1.35)*amount*29.0;
+      vec2 sampleAt=p+displacement;
+      float mask=1.0-smoothstep(-0.75,0.75,d);
+      if(u_mode==2.0){
+        vec3 map=vec3(clamp(vec2(0.5)+displacement/64.0,0.0,1.0),0.5);
+        gl_FragColor=vec4(mix(base*0.45,map,mask),1.0);return;
+      }
+      vec3 glass=blurred(sampleAt,u_blur);
+      // Small channel split at the bevel: chromatic dispersion.
+      float dispersion=bevel*amount*0.85;
+      glass.r=mix(glass.r,scene(sampleAt+n*dispersion).r,0.28);
+      glass.b=mix(glass.b,scene(sampleAt-n*dispersion).b,0.28);
+      glass=mix(glass,u_color,u_tint);
+      vec2 light=normalize(u_light-p+vec2(0.0001));
+      float ndl=dot(n,light);
+      float rim=exp(-inside*0.83);
+      float wide=exp(-inside*0.12);
+      float spec=(pow(max(ndl,0.0),3.0)*0.75+pow(max(-ndl,0.0),5.0)*0.24);
+      glass+=vec3(1.0)*u_shine*(rim*(0.19+spec*0.75)+wide*spec*0.13);
+      glass-=vec3(0.07)*wide*max(-ndl,0.0)*u_shine;
+      gl_FragColor=vec4(mix(base,glass,mask),1.0);
+    }`;
+
+  class LiquidGlass {
+    constructor({canvas, container, source, elements, onStatus = () => {}, fusion = 0}) {
+      this.canvas=canvas;this.container=container;this.source=source;
+      this.elements=Array.from(elements || container.querySelectorAll('[data-glass]')).slice(0,MAX_SHAPES);
+      this.onStatus=onStatus;this.params={refraction:55,blur:2,shine:65,tint:12,color:'#ecf4ff',mode:'glass',adaptive:false,fusion};
+      this.light={x:-100,y:-100};this.frame=0;this.lost=false;this.destroyed=false;this.visible=true;
+      this.rects=new Float32Array(MAX_SHAPES*4);this.radii=new Float32Array(MAX_SHAPES);
+      this.contextLost=(e)=>{e.preventDefault();this.lost=true;this.useFallback('上下文中断 · 毛玻璃降级');};
+      this.contextRestored=()=>{this.lost=false;this.init();this.resize();this.upload();};
+      canvas.addEventListener('webglcontextlost',this.contextLost);
+      canvas.addEventListener('webglcontextrestored',this.contextRestored);
+      this.init();
+      this.observer=new ResizeObserver(()=>this.resize());this.observer.observe(container);
+      this.visibilityObserver=new IntersectionObserver(entries=>{this.visible=entries[0].isIntersecting;if(this.visible)this.invalidate();});
+      this.visibilityObserver.observe(container);
+      this.visibilityHandler=()=>{if(!document.hidden)this.invalidate();};
+      document.addEventListener('visibilitychange',this.visibilityHandler);
+      this.resize();
+    }
+    init(){
+      try {
+        this.gl=this.canvas.getContext('webgl',{alpha:false,antialias:false,depth:false,stencil:false,preserveDrawingBuffer:false});
+        if(!this.gl)throw new Error('WebGL unavailable');
+        const gl=this.gl;
+        const compile=(type,code)=>{const s=gl.createShader(type);gl.shaderSource(s,code);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const info=gl.getShaderInfoLog(s);gl.deleteShader(s);throw new Error(info);}return s;};
+        const vert=compile(gl.VERTEX_SHADER,vertex),frag=compile(gl.FRAGMENT_SHADER,fragment);
+        this.program=gl.createProgram();gl.attachShader(this.program,vert);gl.attachShader(this.program,frag);gl.linkProgram(this.program);
+        gl.deleteShader(vert);gl.deleteShader(frag);
+        if(!gl.getProgramParameter(this.program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(this.program));
+        gl.useProgram(this.program);
+        this.buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);
+        gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+        const location=gl.getAttribLocation(this.program,'a_position');gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,2,gl.FLOAT,false,0,0);
+        this.texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,this.texture);
+        gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+        this.uniforms={};for(const name of ['scene','resolution','dpr','rects[0]','radii[0]','count','refraction','blur','shine','tint','mode','fusion','color','light'])this.uniforms[name]=gl.getUniformLocation(this.program,'u_'+name);
+        this.ready=true;this.container.classList.remove('fallback');this.canvas.style.visibility='visible';this.container.style.backgroundImage='';
+        this.onStatus('WebGL · 实时折射');
+      }catch(error){this.ready=false;this.useFallback('WebGL 不可用 · 毛玻璃降级');console.warn('LiquidGlass fallback:',error.message);}
+    }
+    useFallback(message){
+      this.container.classList.add('fallback');this.canvas.style.visibility='hidden';
+      if(this.source.width)this.container.style.backgroundImage=`url("${this.source.toDataURL()}")`;
+      this.container.style.backgroundSize='100% 100%';this.container.style.setProperty('--fallback-blur',this.params.blur+'px');
+      this.onStatus(message);
+    }
+    resize(){
+      const box=this.container.getBoundingClientRect();if(!box.width||!box.height)return;
+      this.width=box.width;this.height=box.height;this.dpr=Math.min(window.devicePixelRatio||1,1.5);
+      this.canvas.width=Math.round(this.width*this.dpr);this.canvas.height=Math.round(this.height*this.dpr);
+      if(this.ready&&!this.lost)this.gl.viewport(0,0,this.canvas.width,this.canvas.height);
+      this.invalidate();
+    }
+    upload(){
+      if(this.ready&&!this.lost){const gl=this.gl;gl.bindTexture(gl.TEXTURE_2D,this.texture);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,this.source);}
+      else this.useFallback(this.lost?'上下文中断 · 毛玻璃降级':'WebGL 不可用 · 毛玻璃降级');
+      this.invalidate();
+    }
+    set(next){Object.assign(this.params,next);if(!this.ready||this.lost)this.container.style.setProperty('--fallback-blur',this.params.blur+'px');this.invalidate();}
+    setLight(x,y){this.light={x,y};this.invalidate();}
+    invalidate(){if(this.destroyed||this.frame)return;this.frame=requestAnimationFrame(()=>{this.frame=0;if(this.visible&&!document.hidden)this.render();});}
+    render(){
+      if(!this.ready||this.lost||!this.width)return;
+      const gl=this.gl,u=this.uniforms,p=this.params,root=this.container.getBoundingClientRect();
+      let count=0,area=0;
+      for(const el of this.elements){const r=el.getBoundingClientRect();if(!r.width||!r.height)continue;
+        const cssRadius=getComputedStyle(el).borderTopLeftRadius;
+        const resolvedRadius=cssRadius.includes('%')?parseFloat(cssRadius)/100*Math.min(r.width,r.height):parseFloat(cssRadius);
+        const radius=Math.min(resolvedRadius||Number(el.dataset.radius)||0,r.width/2,r.height/2);
+        this.rects.set([r.left-root.left+r.width/2,r.top-root.top+r.height/2,r.width,r.height],count*4);this.radii[count]=radius;
+        area+=r.width*r.height-(4-Math.PI)*radius*radius;count++;
+      }
+      const coverage=Math.min(area/(this.width*this.height),1);
+      const adaptive=p.adaptive?coverage*9:0;
+      gl.useProgram(this.program);gl.uniform1i(u.scene,0);gl.uniform2f(u.resolution,this.width,this.height);gl.uniform1f(u.dpr,this.dpr);
+      gl.uniform4fv(u['rects[0]'],this.rects);gl.uniform1fv(u['radii[0]'],this.radii);gl.uniform1i(u.count,count);
+      gl.uniform1f(u.refraction,p.refraction/100*(p.adaptive?1-coverage*.35:1));gl.uniform1f(u.blur,p.blur+adaptive);
+      gl.uniform1f(u.shine,p.shine/100);gl.uniform1f(u.tint,p.tint/100);gl.uniform1f(u.mode,p.mode==='frosted'?1:p.mode==='map'?2:0);
+      gl.uniform1f(u.fusion,p.fusion);gl.uniform2f(u.light,this.light.x,this.light.y);
+      const hex=p.color.replace('#','');gl.uniform3f(u.color,parseInt(hex.slice(0,2),16)/255,parseInt(hex.slice(2,4),16)/255,parseInt(hex.slice(4,6),16)/255);
+      gl.drawArrays(gl.TRIANGLES,0,6);
+      this.lastRender={count,coverage,blur:p.blur+adaptive,mode:p.mode};
+    }
+    destroy(){
+      this.destroyed=true;cancelAnimationFrame(this.frame);this.observer.disconnect();this.visibilityObserver.disconnect();
+      document.removeEventListener('visibilitychange',this.visibilityHandler);this.canvas.removeEventListener('webglcontextlost',this.contextLost);this.canvas.removeEventListener('webglcontextrestored',this.contextRestored);
+      if(this.gl){this.gl.deleteTexture(this.texture);this.gl.deleteBuffer(this.buffer);this.gl.deleteProgram(this.program);}
+    }
+  }
+  window.LiquidGlass=LiquidGlass;
+})();
+
+</script>
+<script>
+(() => {
+  'use strict';
+  const $=(s,root=document)=>root.querySelector(s),$$=(s,root=document)=>Array.from(root.querySelectorAll(s));
+  const stage=$('#stage'),source=document.createElement('canvas');
+  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+  const defaults={refraction:55,blur:2,shine:65,tint:12,color:'#ecf4ff',mode:'glass',adaptive:false};
+  const presets={clear:{refraction:55,blur:2,shine:65,tint:12},soft:{refraction:24,blur:11,shine:40,tint:23},strong:{refraction:88,blur:.5,shine:94,tint:7}};
+  let scene='coast',view='home',saved=false,mergeRenderer=null,toastTimer;
+  function toast(message){clearTimeout(toastTimer);$('#toast').textContent=message;$('#toast').classList.add('visible');toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),2600);}
+
+  // Original procedural artwork: one owned texture, no network, no CORS.
+  function drawScene(canvas,width,height,theme,headline=true){
+    const scale=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);
+    const ctx=canvas.getContext('2d');ctx.scale(scale,scale);const w=width,h=height;
+    if(theme==='grid'){
+      const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#496879');bg.addColorStop(1,'#9fafb5');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+      const cell=28;ctx.lineWidth=1;
+      for(let x=0;x<w;x+=cell){ctx.strokeStyle=Math.round(x/cell)%4===0?'#dce9e68c':'#dce9e645';ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+      for(let y=0;y<h;y+=cell){ctx.strokeStyle=Math.round(y/cell)%4===0?'#dce9e68c':'#dce9e645';ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+      ctx.fillStyle='#f0f5ef88';ctx.font='9px monospace';for(let x=10;x<w;x+=112)for(let y=20;y<h;y+=112)ctx.fillText(`${x-10},${y-20}`,x,y);
+      ctx.strokeStyle='#f4dfb9';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,h*.37);ctx.lineTo(w,h*.37);ctx.stroke();
+    }else if(theme==='aurora'){
+      const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#1d2e4e');bg.addColorStop(.48,'#7487a8');bg.addColorStop(1,'#c4a6c0');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+      for(let i=0;i<5;i++){
+        const grad=ctx.createLinearGradient(0,h*.15+i*30,w,h*.8);grad.addColorStop(0,['#9ad4dc88','#6c80cbaa','#93bedcaa','#e8c6dcaa','#6b75a277'][i]);grad.addColorStop(.5,'#d6e7e575');grad.addColorStop(1,'#7783ab11');
+        ctx.fillStyle=grad;ctx.beginPath();ctx.moveTo(-w*.2,h*(.25+i*.13));ctx.bezierCurveTo(w*.45,-h*.22+i*50,w*.5,h*1.1,w*1.2,h*(.3+i*.15));ctx.lineTo(w*1.2,h*1.3);ctx.lineTo(-w*.2,h*1.3);ctx.closePath();ctx.fill();
+        ctx.strokeStyle='#f0ecff30';ctx.lineWidth=1;ctx.stroke();
+      }
+    }else{
+      const sky=ctx.createLinearGradient(0,0,w*.2,h);sky.addColorStop(0,'#486d7e');sky.addColorStop(.28,'#9cb7be');sky.addColorStop(.52,'#d4d5c9');sky.addColorStop(.7,'#9caead');sky.addColorStop(1,'#b8a088');ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
+      const sunlight=ctx.createRadialGradient(w*.82,h*.16,0,w*.82,h*.16,w*.65);sunlight.addColorStop(0,'#fff2d58c');sunlight.addColorStop(.3,'#eee4c936');sunlight.addColorStop(1,'#efdfbc00');ctx.fillStyle=sunlight;ctx.fillRect(0,0,w,h);
+      // Atmospheric headlands.
+      ctx.fillStyle='#768c8e65';ctx.beginPath();ctx.moveTo(0,h*.4);ctx.bezierCurveTo(w*.1,h*.35,w*.23,h*.36,w*.34,h*.43);ctx.bezierCurveTo(w*.49,h*.53,w*.57,h*.36,w*.73,h*.45);ctx.lineTo(w,h*.49);ctx.lineTo(0,h*.56);ctx.fill();
+      const sea=ctx.createLinearGradient(0,h*.47,0,h);sea.addColorStop(0,'#7e9b9c');sea.addColorStop(.25,'#6b9195');sea.addColorStop(1,'#b9d1c7');ctx.fillStyle=sea;ctx.beginPath();ctx.moveTo(0,h*.47);ctx.bezierCurveTo(w*.3,h*.43,w*.62,h*.46,w,h*.47);ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.fill();
+      // Thin water lines make optical distortion inspectable.
+      for(let i=0;i<95;i++){
+        const y=h*.48+(i/95)**1.35*h*.52;const amplitude=1+i*.07;
+        ctx.beginPath();ctx.moveTo(0,y);ctx.bezierCurveTo(w*.3,y-amplitude,w*.63,y+amplitude*1.4,w,y-2);ctx.lineWidth=i%5===0?1:.45;ctx.strokeStyle=`rgba(225,238,224,${.04+(i%7)*.014})`;ctx.stroke();
+      }
+      const sand=ctx.createLinearGradient(w*.8,h*.62,w*.3,h);sand.addColorStop(0,'#d7c5a8');sand.addColorStop(.35,'#c5ac8d');sand.addColorStop(1,'#9b816c');ctx.fillStyle=sand;
+      ctx.beginPath();ctx.moveTo(w*1.1,h*.37);ctx.bezierCurveTo(w*.8,h*.54,w*.95,h*.63,w*.65,h*.8);ctx.bezierCurveTo(w*.48,h*.94,w*.25,h*.88,-w*.12,h*1.1);ctx.lineTo(w*1.1,h*1.1);ctx.closePath();ctx.fill();
+      for(let i=0;i<6;i++){
+        ctx.beginPath();ctx.moveTo(w*1.1+i*5,h*.37-10+i*3);ctx.bezierCurveTo(w*.8-i*4,h*.54,w*.95-i*4,h*.63,w*.65-i*4,h*.8-i*2);ctx.bezierCurveTo(w*.48-i*5,h*.94-i*2,w*.25-i*5,h*.88-i*3,-w*.12,h*1.1-i*3);
+        ctx.lineWidth=i===0?3.5:1;ctx.strokeStyle=i===0?'#e9eee2a6':`rgba(231,237,219,${.27-i*.035})`;ctx.stroke();
+      }
+      const shade=ctx.createLinearGradient(0,0,0,h);shade.addColorStop(0,'#16384f17');shade.addColorStop(.5,'#263a3c00');shade.addColorStop(1,'#273b4333');ctx.fillStyle=shade;ctx.fillRect(0,0,w,h);
+    }
+    if(headline){
+      const mobile=w<450;ctx.fillStyle='#fffdf2e6';const size=mobile?57:Math.min(85,w*.104);ctx.font=`500 ${size}px Georgia, "Times New Roman", serif`;ctx.textBaseline='top';ctx.letterSpacing='-2px';
+      const text=view==='favorites'?(saved?['Keep the','good light.']:['Room for','a favorite.']):view==='explore'?['Follow','the light.']:['A little','clarity.'];
+      const x=mobile?22:32,y=h*.225;ctx.fillText(text[0],x,y);ctx.fillText(text[1],x,y+size*.94);ctx.letterSpacing='0px';
+    }
+  }
+  const renderer=new LiquidGlass({canvas:$('#glass-canvas'),container:stage,source,onStatus:s=>$('#renderer-status').textContent=s});
+  const redraw=()=>{const r=stage.getBoundingClientRect();drawScene(source,r.width,r.height,scene);renderer.upload();};
+  const sceneResize=new ResizeObserver(()=>{redraw();clampDraggables(stage);});sceneResize.observe(stage);redraw();
+  function updateRange(input){const v=(+input.value-Number(input.min))/(Number(input.max)-Number(input.min))*100;input.style.setProperty('--progress',v+'%');}
+  function syncParameters(){
+    for(const key of ['refraction','blur','shine','tint']){const el=$('#'+key);el.value=renderer.params[key];updateRange(el);$('#'+key+'-value').innerHTML=(key==='blur'?Number(el.value).toFixed(1):el.value)+`<span>${key==='blur'?'px':'%'}</span>`;}
+    $$('.swatches button').forEach(b=>{const yes=b.dataset.color===renderer.params.color;b.classList.toggle('selected',yes);b.setAttribute('aria-pressed',yes);});
+    $('#adaptive').checked=renderer.params.adaptive;
+    if(mergeRenderer)mergeRenderer.set({...renderer.params,mode:'glass',fusion:+$('#fusion').value});
+  }
+  for(const key of ['refraction','blur','shine','tint'])$('#'+key).addEventListener('input',e=>{
+    renderer.set({[key]:+e.target.value});syncParameters();$$('[data-preset]').forEach(b=>{b.classList.remove('selected');b.setAttribute('aria-pressed','false');});
+  });
+  $$('[data-preset]').forEach(button=>button.addEventListener('click',()=>{
+    renderer.set(presets[button.dataset.preset]);syncParameters();$$('[data-preset]').forEach(b=>{const yes=b===button;b.classList.toggle('selected',yes);b.setAttribute('aria-pressed',yes);});
+  }));
+  $$('.swatches button').forEach(b=>b.addEventListener('click',()=>{renderer.set({color:b.dataset.color});syncParameters();}));
+  $$('[data-mode]').forEach(b=>b.addEventListener('click',()=>{
+    renderer.set({mode:b.dataset.mode});$$('[data-mode]').forEach(x=>{const yes=x===b;x.classList.toggle('selected',yes);x.setAttribute('aria-pressed',yes);});
+    if(b.dataset.mode==='map')toast('置换场：R = 水平偏移，G = 垂直偏移，中性值为 0.5');
+  }));
+  const scenes={coast:{name:'海岸晨光',index:'01 / COASTLINE',desc:'在光与海之间，慢下来。'},aurora:{name:'流动极光',index:'02 / AURORA',desc:'光缓缓游走，留下柔软的轮廓。'},grid:{name:'折射测试网格',index:'03 / OPTICAL GRID',desc:'把透镜放在线条上，观察边缘的弯折。'}};
+  function setScene(next){scene=next;stage.dataset.theme=scene;$('#scene-name').textContent=scenes[scene].name;$('.scene-index').textContent=scenes[scene].index;$('#scene-description').textContent=scenes[scene].desc;
+    $$('[data-scene]').forEach(b=>{const yes=b.dataset.scene===scene;b.classList.toggle('selected',yes);b.setAttribute('aria-pressed',yes);});redraw();
+  }
+  $$('[data-scene]').forEach(b=>b.addEventListener('click',()=>setScene(b.dataset.scene)));
+  $('#adaptive').addEventListener('change',e=>{renderer.set({adaptive:e.target.checked});syncParameters();});
+  $('#follow-light').checked=!reducedMotion.matches;
+  function pointerLight(event,container,instance){if(!$('#follow-light').checked||reducedMotion.matches)return;const r=container.getBoundingClientRect();instance.setLight(event.clientX-r.left,event.clientY-r.top);}
+  stage.addEventListener('pointermove',e=>pointerLight(e,stage,renderer));stage.addEventListener('pointerleave',()=>renderer.setLight(-100,-100));
+  $('#follow-light').addEventListener('change',()=>{if(!$('#follow-light').checked)renderer.setLight(-100,-100);});
+  reducedMotion.addEventListener('change',()=>{$('#follow-light').checked=!reducedMotion.matches;renderer.setLight(-100,-100);});
+  function clampDraggables(container){$$('[data-draggable]',container).forEach(el=>{if(!el.style.left)return;const maxX=Math.max(0,container.clientWidth-el.offsetWidth),maxY=Math.max(0,container.clientHeight-el.offsetHeight);el.style.left=Math.max(0,Math.min(parseFloat(el.style.left),maxX))+'px';el.style.top=Math.max(0,Math.min(parseFloat(el.style.top),maxY))+'px';});}
+  function draggable(el,container,instance){
+    el.dataset.draggable='true';let drag=null;
+    const position=(x,y)=>{el.style.left=Math.max(0,Math.min(x,container.clientWidth-el.offsetWidth))+'px';el.style.top=Math.max(0,Math.min(y,container.clientHeight-el.offsetHeight))+'px';instance.invalidate();};
+    el.addEventListener('pointerdown',e=>{if(e.button!==0)return;const a=el.getBoundingClientRect(),b=container.getBoundingClientRect();drag={x:e.clientX,y:e.clientY,left:a.left-b.left,top:a.top-b.top,id:e.pointerId};el.setPointerCapture(e.pointerId);});
+    el.addEventListener('pointermove',e=>{if(drag&&e.pointerId===drag.id)position(drag.left+e.clientX-drag.x,drag.top+e.clientY-drag.y);});
+    const end=()=>drag=null;el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);el.addEventListener('lostpointercapture',end);
+    el.addEventListener('keydown',e=>{const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(!d)return;e.preventDefault();const a=el.getBoundingClientRect(),b=container.getBoundingClientRect(),step=e.shiftKey?20:5;position(a.left-b.left+d[0]*step,a.top-b.top+d[1]*step);});
+  }
+  draggable($('#lens'),stage,renderer);
+  function selectView(next){view=next;const buttons=$$('[data-view]'),index=buttons.findIndex(b=>b.dataset.view===view);buttons.forEach(b=>{const yes=b.dataset.view===view;b.classList.toggle('active',yes);b.setAttribute('aria-pressed',yes);});
+    const b=buttons[index];$('.dock-indicator').style.width=b.offsetWidth+'px';$('.dock-indicator').style.transform=`translateX(${b.offsetLeft-buttons[0].offsetLeft}px)`;redraw();
+    if(view==='favorites')$('#scene-description').textContent=saved?'已收藏这束光。':'点击右下角加号，收藏当前场景。';
+    else $('#scene-description').textContent=view==='explore'?'试试右侧的三种背景，寻找你的光。':scenes[scene].desc;
+  }
+  $$('[data-view]').forEach(b=>b.addEventListener('click',()=>selectView(b.dataset.view)));
+  new ResizeObserver(()=>selectView(view)).observe($('.dock'));
+  function favorite(){saved=!saved;$('#favorite').classList.toggle('saved',saved);$('#favorite').setAttribute('aria-pressed',saved);$('#favorite').setAttribute('aria-label',saved?'取消收藏当前场景':'收藏当前场景');$('#favorite use').setAttribute('href',saved?'#i-check':'#i-plus');toast(saved?'已收藏当前场景（本次会话）':'已取消收藏');if(view==='favorites')selectView(view);}
+  $('#favorite').addEventListener('click',favorite);
+
+  // A small real, locally synthesized sound. Audio begins only on a user gesture.
+  let audioContext=null,audioGain=null,oscillators=[],playing=false;
+  async function toggleAudio(){
+    try{
+      if(playing){audioGain.gain.setTargetAtTime(0,audioContext.currentTime,.12);playing=false;await audioContext.suspend();}
+      else{
+        if(!audioContext){const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)throw new Error('当前浏览器不支持 Web Audio');audioContext=new AudioCtx();audioGain=audioContext.createGain();audioGain.gain.value=0;audioGain.connect(audioContext.destination);
+          [130.81,196,261.63,329.63].forEach((f,i)=>{const osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.type='sine';osc.frequency.value=f;osc.detune.value=(i-1.5)*3;gain.gain.value=.12;osc.connect(gain);gain.connect(audioGain);osc.start();oscillators.push(osc);});
+        }
+        await audioContext.resume();audioGain.gain.setTargetAtTime(+$('#volume').value/100*.24,audioContext.currentTime,.35);playing=true;
+      }
+      $('#play').setAttribute('aria-pressed',playing);$('#play').setAttribute('aria-label',playing?'暂停氛围音':'播放氛围音');$('#play use').setAttribute('href',playing?'#i-pause':'#i-play');$('#track-status').textContent=playing?'合成氛围音 · 正在播放':'合成氛围音 · 已暂停';
+    }catch(error){toast('音频未能播放：'+error.message);}
+  }
+  $('#play').addEventListener('click',toggleAudio);
+  $('#volume').addEventListener('input',e=>{updateRange(e.target);$('#volume-value').textContent=e.target.value;if(playing)audioGain.gain.setTargetAtTime(+e.target.value/100*.24,audioContext.currentTime,.1);});
+  window.addEventListener('pagehide',()=>{if(audioContext)audioContext.suspend();});
+
+  $('#reset').addEventListener('click',()=>{
+    renderer.set({...defaults});$('#follow-light').checked=!reducedMotion.matches;renderer.setLight(-100,-100);syncParameters();
+    $$('[data-preset]').forEach(b=>{const yes=b.dataset.preset==='clear';b.classList.toggle('selected',yes);b.setAttribute('aria-pressed',yes);});
+    $$('[data-mode]').forEach(b=>{const yes=b.dataset.mode==='glass';b.classList.toggle('selected',yes);b.setAttribute('aria-pressed',yes);});
+    $('#lens').style.left='';$('#lens').style.top='';toast('已恢复默认材质');
+  });
+  $('#export-config').addEventListener('click',async()=>{
+    const config=JSON.stringify({...renderer.params,followLight:$('#follow-light').checked,scene},null,2);
+    try{await navigator.clipboard.writeText(config);toast('材质参数已复制');}
+    catch{const blob=new Blob([config],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='liquid-glass-config.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('已导出材质参数 JSON');}
+  });
+  $('#open-code').addEventListener('click',()=>$('#code-dialog').showModal());
+  $$('.dialog-close').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));
+  $$('dialog').forEach(d=>d.addEventListener('click',e=>{const r=d.getBoundingClientRect();if(e.target===d&&(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom))d.close();}));
+  $('#merge-open').addEventListener('click',()=>{
+    $('#merge-dialog').showModal();
+    if(!mergeRenderer){const container=$('#merge-stage'),mergeSource=document.createElement('canvas');
+      mergeRenderer=new LiquidGlass({canvas:$('#merge-canvas'),container,source:mergeSource,fusion:+$('#fusion').value});
+      const refresh=()=>{const r=container.getBoundingClientRect();if(!r.width)return;drawScene(mergeSource,r.width,r.height,'grid',false);mergeRenderer.upload();clampDraggables(container);};
+      new ResizeObserver(refresh).observe(container);refresh();$$('.orb').forEach(b=>draggable(b,container,mergeRenderer));container.addEventListener('pointermove',e=>pointerLight(e,container,mergeRenderer));
+    }
+    syncParameters();mergeRenderer.resize();mergeRenderer.invalidate();
+  });
+  $('#fusion').addEventListener('input',e=>{updateRange(e.target);$('#fusion-value').textContent=e.target.value+'px';if(mergeRenderer)mergeRenderer.set({fusion:+e.target.value});});
+  syncParameters();$$('input[type=range]').forEach(updateRange);
+  // Small inspection hook for integration / QA.
+  window.liquidLab={renderer,get mergeRenderer(){return mergeRenderer;},get scene(){return scene;},get audioState(){return audioContext?audioContext.state:'uninitialized';},drawScene};
+})();
+
+</script>
+</body>
+</html>

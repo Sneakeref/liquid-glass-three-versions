@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="原生 HTML、CSS、JavaScript 与 WebGL 实现的液态玻璃控件实验。离线可用，无外部依赖。">
+<title>Liquid Glass — 光的试验场</title>
+<style>
+/* All UI is real HTML. Only the background/material is rendered in WebGL. */
+:root{--paper:#f6f5f2;--ink:#24282a;--muted:#858783;--line:#e4e5df;--accent:#5b664c;--font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 var(--font);-webkit-font-smoothing:antialiased}button,input{font:inherit}button{cursor:pointer;color:inherit}button, input{-webkit-tap-highlight-color:transparent}button{border:0}button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:3px solid #677dce;outline-offset:5px}button:disabled{opacity:.5;cursor:default}svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}.icon-defs{position:absolute;width:0;height:0;overflow:hidden}.shell{max-width:1480px;margin:auto;padding:0 42px}header{height:88px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:11px;font-weight:600;letter-spacing:-.4px;font-size:19px}.brand-mark{position:relative;width:31px;height:34px}.brand-mark:before,.brand-mark:after{content:"";position:absolute;width:22px;height:29px;border:1.5px solid #525a51;border-radius:60% 46% 59% 45%;transform:rotate(29deg);left:3px;top:1px}.brand-mark:after{transform:rotate(-29deg);left:7px;opacity:.5}.brand small{font-size:10px;letter-spacing:1.7px;font-weight:450;color:var(--muted);padding-left:15px;border-left:1px solid #d6d8d0;margin-left:8px}.header-right{display:flex;gap:24px;align-items:center;font-size:11px;color:#777e72;letter-spacing:.8px}.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.header-tag{border:1px solid #d8dcd3;border-radius:7px;padding:5px 10px;letter-spacing:.3px}.intro{display:flex;align-items:flex-end;justify-content:space-between;padding:39px 0 29px;gap:22px}.eyebrow{text-transform:uppercase;letter-spacing:2px;font-size:10px;color:#858c7e;margin:0 0 8px}.title-line{display:flex;align-items:baseline;gap:20px}h1{font-size:clamp(38px,4.4vw,62px);line-height:1.1;font-weight:520;letter-spacing:-3.1px;margin:0}.title-dot{color:#838d77}.intro-copy{font-size:13px;letter-spacing:1px;color:#7b8077;margin:12px 0 0}.intro-actions{display:flex;gap:17px;align-items:center;margin-bottom:4px}.live{display:flex;align-items:center;gap:7px;color:#737b6b;font-size:11px;white-space:nowrap}.live i{width:6px;height:6px;background:#859773;border-radius:50%;box-shadow:0 0 0 3px #85977315}.quiet-button{display:flex;gap:9px;align-items:center;background:#fff9;border:1px solid #dfe2d9;border-radius:9px;padding:10px 14px;font-size:12px;transition:background .2s}.quiet-button:hover{background:#fff}.quiet-button svg{width:16px;height:16px}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 304px;gap:22px;align-items:stretch}.preview-column{min-width:0}.stage{height:612px;position:relative;isolation:isolate;overflow:hidden;border-radius:21px;background:#bd6661;box-shadow:0 2px 2px #1c211009,0 15px 45px #2921160c;color:#fff}.source-canvas{position:absolute;pointer-events:none;z-index:0}.optics-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}.scene-ui{position:absolute;inset:0;z-index:2;pointer-events:none}.scene-ui>*{pointer-events:auto}.stage-top{position:absolute;top:26px;left:26px;right:26px;display:flex;gap:12px;align-items:center;pointer-events:none}.stage-top>*{pointer-events:auto}.glass{background:transparent;position:relative;color:inherit;border:0;box-shadow:inset 0 0 0 1px #ffffff10;text-shadow:0 1px 6px #30152e38}.glass:focus-visible{outline-color:#fff;outline-offset:5px}.search{height:46px;max-width:282px;flex:1;border-radius:24px;display:flex;gap:10px;align-items:center;padding:0 16px}.search svg{width:17px;height:17px;opacity:.92}.search input{border:0;background:none;outline:0;color:#fff;width:100%;font-size:12px;min-width:0}.search input:focus-visible{outline:none}.search:focus-within{outline:2px solid #ffffffb3;outline-offset:3px}.search input::placeholder{color:#ffffffe0}.search kbd{font:10px var(--font);color:#ffffffa0;white-space:nowrap;border:1px solid #ffffff30;border-radius:4px;padding:0 4px}.round{width:46px;height:46px;border-radius:50%;display:grid;place-items:center}.scene-tag{position:absolute;top:111px;left:35px;font-size:9px;letter-spacing:2.4px;color:#ffffffe0;pointer-events:none}.scene-count{position:absolute;top:32px;right:30px;font-size:10px;letter-spacing:2px;pointer-events:none}.lens{position:absolute;left:37%;top:39%;width:232px;height:136px;border-radius:40px;display:flex;align-items:center;justify-content:center;flex-direction:column;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;will-change:left,top;outline-offset:7px}.lens.dragging{cursor:grabbing}.lens-title{font-size:43px;font-family:Georgia,"Times New Roman",serif;font-style:italic;letter-spacing:-1.3px;font-weight:400;line-height:1.2}.lens-caption{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:10px;letter-spacing:1.1px;color:#ffffffe0}.lens-caption svg{width:12px;height:12px}.drop{position:absolute;left:73%;top:44.5%;width:64px;height:64px;border-radius:50%;touch-action:manipulation}.drop svg{width:23px;height:23px;transition:transform .3s}.drop[aria-pressed=true] svg{transform:rotate(45deg)}.fusion-hint{position:absolute;top:69%;left:0;right:0;text-align:center;pointer-events:none;font-size:10px;letter-spacing:.7px;opacity:.9}.scene-bottom{position:absolute;bottom:25px;left:26px;right:26px;display:flex;flex-direction:column;gap:14px;align-items:center}.scene-tools{display:flex;align-items:center;gap:12px;width:100%;justify-content:center}.light-control{display:flex;align-items:center;gap:12px;width:205px;height:48px;border-radius:26px;padding:0 15px}.light-control svg{width:17px;height:17px}.light-control input{width:100%;accent-color:#fff;min-width:0}.glass-range{-webkit-appearance:none;appearance:none;background:transparent;height:32px;margin:0;cursor:pointer}.glass-range::-webkit-slider-runnable-track{height:3px;border-radius:3px;background:#ffffff55}.glass-range::-moz-range-track{height:3px;border-radius:3px;background:#ffffff55}.glass-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;margin-top:-6.5px;box-shadow:0 2px 7px #0002}.glass-range::-moz-range-thumb{width:16px;height:16px;border:0;border-radius:50%;background:#fff;box-shadow:0 2px 7px #0002}.glass-toggle{border-radius:24px;width:76px;height:44px;padding:5px;display:flex;align-items:center}.toggle-knob{width:34px;height:34px;border-radius:50%;background:#ffffffe0;box-shadow:0 2px 7px #0002;display:grid;place-items:center;transition:transform .3s cubic-bezier(.2,.8,.2,1);color:#746164}.glass-toggle[aria-checked=true] .toggle-knob{transform:translateX(32px)}.toggle-knob svg{width:15px;height:15px}.segmented{height:58px;width:336px;padding:5px;display:flex;gap:3px;border-radius:31px}.segmented button{background:none;border-radius:25px;flex:1;display:flex;align-items:center;justify-content:center;gap:7px;color:#ffffffe0;position:relative;z-index:1;font-size:11px;transition:color .2s}.segmented button svg{width:17px;height:17px}.segmented button[aria-pressed=true]{color:#fff}.segmented .selection{position:absolute;top:5px;bottom:5px;left:5px;width:calc((100% - 16px)/3);background:#ffffff26;border:1px solid #ffffff30;border-radius:25px;box-shadow:0 3px 9px #0000000d;transition:transform .35s cubic-bezier(.2,.8,.2,1)}.stage-footnote{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:13px 3px;font-size:10px;color:#8b8d87;letter-spacing:.2px}.stage-footnote .demo-key{display:flex;align-items:center;gap:7px}.small-square{width:5px;height:5px;border:1px solid #a3a899;transform:rotate(45deg)}.inspector{background:#fff9;border:1px solid #e1e4db;border-radius:19px;padding:24px 22px 21px;min-width:0;align-self:start}.panel-heading{display:flex;justify-content:space-between;align-items:center}.panel-heading h2{font-size:15px;letter-spacing:.5px;font-weight:550;margin:0}.panel-heading span{font-size:9px;color:#9a9f92;letter-spacing:1.3px}.section-label{font-size:10px;color:#939b89;letter-spacing:1px;margin:20px 0 8px;display:flex;justify-content:space-between;align-items:center}.preset-row{display:flex;padding:4px;background:#edf0e7;border:1px solid #e5e8dd;border-radius:10px;gap:3px}.preset-row button{background:transparent;flex:1;padding:6px 0;border-radius:7px;color:#858d7d;font-size:11px;transition:all .2s}.preset-row button[aria-pressed=true]{background:#fff;color:#48593a;box-shadow:0 2px 4px #273c1210}.parameter{margin-top:12px}.parameter-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#606857}.parameter-head label{cursor:pointer}.parameter-head output{font:10px ui-monospace,SFMono-Regular,Consolas,monospace;color:#8d9584;background:#f0f2eb;padding:2px 5px;min-width:35px;border-radius:4px;text-align:right}.range{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;margin:2px 0 0;cursor:pointer}.range::-webkit-slider-runnable-track{height:3px;background:linear-gradient(to right,#717f5d var(--fill,50%),#e2e7d8 var(--fill,50%));border-radius:3px}.range::-moz-range-track{height:3px;background:#e2e7d8;border-radius:3px}.range::-moz-range-progress{height:3px;background:#717f5d;border-radius:3px}.range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:13px;height:13px;background:#fdfdfb;border:1px solid #9ca78f;border-radius:50%;margin-top:-5px;box-shadow:0 1px 2px #00000015}.range::-moz-range-thumb{width:12px;height:12px;background:#fdfdfb;border:1px solid #9ca78f;border-radius:50%;box-shadow:0 1px 2px #00000015}.divider{height:1px;background:#e9ece2;margin:15px 0 12px}.switch-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}.switch-copy label{font-size:11px;cursor:pointer;color:#59644e}.switch-copy p{font-size:9px;color:#9aa18f;margin:3px 0 0}.switch{width:30px;height:18px;border-radius:12px;background:#dbe0d3;padding:3px;flex-shrink:0;transition:background .2s}.switch:after{content:"";display:block;width:12px;height:12px;border-radius:50%;background:white;box-shadow:0 1px 2px #0001;transition:transform .2s}.switch[aria-checked=true]{background:#778868}.switch[aria-checked=true]:after{transform:translateX(12px)}.scene-choices{display:flex;gap:8px;align-items:center}.scene-choice{height:36px;border-radius:8px;flex:1;position:relative;border:2px solid #fff;outline:1px solid #dfe3d7;background:#aaa;box-shadow:none}.scene-choice[aria-pressed=true]{outline:1.5px solid #7d8c6c}.scene-choice[aria-pressed=true]:after{content:"";position:absolute;right:4px;bottom:4px;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 1px 4px #0004}.scene-coral{background:radial-gradient(ellipse at 10% 15%,#fcd7b2,transparent 70%),linear-gradient(145deg,#a288ad,#e69586 48%,#962f53 50%,#f3864d)}.scene-aurora{background:radial-gradient(ellipse at 10% 85%,#b6d386,transparent 70%),linear-gradient(145deg,#4a4365,#9994cc 48%,#558c8d 50%,#204b45)}.scene-grid{background-color:#687164;background-image:linear-gradient(45deg,#d4d9c9 25%,transparent 25%,transparent 75%,#d4d9c9 75%),linear-gradient(45deg,#d4d9c9 25%,transparent 25%,transparent 75%,#d4d9c9 75%);background-position:0 0,8px 8px;background-size:16px 16px}.scene-upload{background:#f0f2eb;flex:0 0 39px;display:grid;place-items:center;color:#8a947e;border:1px dashed #c6cdba;outline:0}.scene-upload svg{width:15px;height:15px}.panel-bottom{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e6eadf;margin-top:18px;padding-top:14px}.reset{background:none;color:#8b9580;font-size:10px;padding:0;display:flex;align-items:center;gap:6px}.reset svg{width:12px;height:12px}.value-chip{font:9px ui-monospace,SFMono-Regular,Consolas,monospace;color:#a3aa9a}.caption-grid{margin-top:27px;padding:26px 0 30px;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);gap:32px}.caption-item{display:flex;gap:12px}.caption-item .num{font:10px ui-monospace,SFMono-Regular,Consolas,monospace;color:#a4aa9d;padding-top:3px}.caption-item h3{font-size:12px;font-weight:550;margin:0 0 5px;color:#5d6853}.caption-item p{font-size:11px;line-height:1.9;margin:0;color:#94998d}.page-footer{border-top:1px solid var(--line);padding:17px 0 24px;display:flex;justify-content:space-between;font-size:9px;color:#969d8e;letter-spacing:.5px}.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,12px);background:#283123eb;backdrop-filter:blur(12px);color:#fff;border-radius:12px;padding:12px 20px;font-size:12px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:9;max-width:calc(100% - 32px);text-align:center;box-shadow:0 4px 20px #0002}.toast.visible{opacity:1;transform:translate(-50%,0)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.no-webgl .optics-canvas{display:none}.no-webgl .glass{background:linear-gradient(135deg,var(--fallback-tint,#ffffff2b),#ffffff0b);backdrop-filter:blur(var(--fallback-blur,1.2px)) saturate(1.15);-webkit-backdrop-filter:blur(var(--fallback-blur,1.2px)) saturate(1.15);box-shadow:inset 0 1px 1px #ffffff94,inset 0 -1px 1px #ffffff36,0 10px 24px #25152826}.fallback-note{display:none;position:absolute;left:22px;right:22px;top:87px;font-size:10px;text-align:center;color:#fff;background:#342d4866;padding:7px;border-radius:8px;pointer-events:none}.no-webgl .fallback-note{display:block}.no-webgl .scene-tag{display:none}.reduced .selection,.reduced .toggle-knob,.reduced .drop svg{transition:none}
+@media(min-width:1500px){.stage{height:655px}.inspector{padding-bottom:23px}.parameter{margin-top:17px}}
+@media(max-width:1100px){.shell{padding:0 25px}.workspace{grid-template-columns:minmax(0,1fr) 277px;gap:17px}.inspector{padding:21px 18px}.stage{height:605px}.scene-count{display:none}.lens{width:210px;height:126px}.scene-tag{left:28px}.intro{padding-top:30px}.header-right{gap:13px}.title-line{gap:12px}}
+@media(max-width:820px){.workspace{grid-template-columns:1fr}.stage{height:620px}.inspector{display:grid;grid-template-columns:1fr 1fr;column-gap:28px;padding:24px}.panel-heading{grid-column:1/-1}.presets-section{grid-column:1}.param-group{grid-column:1;grid-row:3 / 6}.options-group{grid-column:2;grid-row:2 / 6}.options-group .divider{margin-top:23px}.panel-bottom{grid-column:1/-1}.intro-actions .live{display:none}.caption-grid{margin-top:16px}.brand small{display:none}.scene-count{display:block}}
+@media(max-width:520px){.shell{padding:0 17px}header{height:69px}.header-right{font-size:9px;gap:10px}.header-right>span:first-child{display:none}.brand{font-size:17px}.brand-mark{transform:scale(.87)}.header-tag{padding:4px 7px}.intro{padding:28px 0 23px;align-items:center}.intro h1{font-size:40px;letter-spacing:-2.3px}.intro .eyebrow{font-size:8px;letter-spacing:1.8px}.intro-copy{font-size:11px;letter-spacing:.6px;margin-top:10px}.quiet-button{padding:9px;font-size:0;gap:0;border-radius:10px}.quiet-button svg{width:18px;height:18px}.stage{height:580px;border-radius:18px}.stage-top{left:20px;right:20px;top:21px;gap:10px}.search{max-width:none}.search kbd{display:none}.search input{font-size:11px}.scene-count{display:none}.scene-tag{top:101px;left:23px;font-size:8px}.lens{width:192px;height:124px;border-radius:35px}.lens-title{font-size:38px}.lens-caption{font-size:9px}.drop{width:55px;height:55px}.scene-bottom{bottom:23px;left:17px;right:17px;gap:12px}.segmented{max-width:100%;height:56px}.scene-tools{gap:10px}.light-control{width:177px;height:46px}.glass-toggle{width:70px;height:42px}.toggle-knob{width:32px;height:32px}.glass-toggle[aria-checked=true] .toggle-knob{transform:translateX(28px)}.round{height:44px;width:44px}.fusion-hint{top:67%;font-size:9px}.stage-footnote{font-size:8px;padding:12px 2px;gap:6px}.inspector{padding:21px 18px;column-gap:21px;border-radius:16px}.section-label{font-size:9px}.parameter-head{font-size:10px}.parameter-head output{font-size:9px;min-width:31px}.preset-row button{font-size:10px}.switch-copy label{font-size:10px}.switch-copy p{font-size:8px;line-height:1.6}.scene-choices{gap:5px;flex-wrap:wrap}.scene-choice{height:34px;min-width:26px}.scene-upload{flex:0 0 28px}.caption-grid{grid-template-columns:1fr;gap:17px;margin-top:10px;padding:21px 0}.caption-item p{font-size:10px}.caption-item h3{font-size:11px;margin-bottom:2px}.caption-item .num{font-size:9px}.page-footer{font-size:8px;gap:8px}.value-chip{font-size:8px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+@media(prefers-contrast:more){.scene-ui .glass{text-shadow:0 1px 3px #000,0 0 6px #000}.inspector,.caption-item p{color:#414b36}.glass{box-shadow:inset 0 0 0 2px white}.glass input::placeholder{color:#fff}}
+
+/* Keep switch and round hit targets stable when the light slider shrinks. */
+.scene-tools>.round,.glass-toggle{flex-shrink:0}.light-control{min-width:0}
+@media(max-width:520px){.stage .drop{width:55px;height:55px}}
+@media(max-width:360px){.intro h1{font-size:35px}.intro{gap:10px}.intro-copy{font-size:10px}.lens{width:174px}.stage .drop{width:48px;height:48px}.scene-tools{gap:8px}.scene-tools>.round{width:40px;height:40px}.scene-bottom{left:14px;right:14px}.segmented button{gap:5px;font-size:10px}.inspector{column-gap:15px}.page-footer{font-size:7px}}
+.tint-control{display:flex;align-items:center;gap:7px;font-size:10px;color:#909984}.tint-control input{width:27px;height:21px;padding:2px;border:1px solid #dce2d3;border-radius:6px;background:#fff;cursor:pointer}.tint-control input::-webkit-color-swatch-wrapper{padding:0}.tint-control input::-webkit-color-swatch{border:0;border-radius:3px}
+</style>
+</head>
+<body>
+<svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-move" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18m-12-6 3-3 3 3m-9 3-3 3 3 3m3 3 3 3 3-3m3-9 3 3-3 3"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></symbol>
+<symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 8c3-7 7 7 10 0s7 7 10 0M2 16c3-7 7 7 10 0s7 7 10 0"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></symbol>
+<symbol id="i-orbit" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="11" ry="5" transform="rotate(-35 12 12)"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 4.7a5.5 5.5 0 0 0-7.8 0L12 5.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.5a5.5 5.5 0 0 0 0-7.8Z"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3M7 8l5-5 5 5M4 15v5h16v-5"/></symbol>
+<symbol id="i-export" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14M10 5H5v14h14v-5"/></symbol>
+<symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 10a9 9 0 1 1 1 7M3 4v6h6"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+</defs></svg>
+<div class="shell">
+<header><div class="brand"><span class="brand-mark" aria-hidden="true"></span>form<span class="title-dot">.</span><small>MATERIAL EXPLORATIONS</small></div><div class="header-right"><span class="mono">EXPERIMENT / 001</span><span class="header-tag">原生 Web · 零依赖</span></div></header>
+<main>
+<section class="intro" aria-labelledby="page-title"><div><p class="eyebrow">A study of light & interaction</p><div class="title-line"><h1 id="page-title">Liquid Glass<span class="title-dot">.</span></h1></div><p class="intro-copy">让光，流过界面。一个可以触摸的材质实验。</p></div><div class="intro-actions"><span class="live"><i></i><span id="render-status">实时折射</span></span><button class="quiet-button" id="export-config" title="导出当前材质参数"><span>导出参数</span><svg><use href="#i-export"/></svg></button></div></section>
+<div class="workspace">
+<section class="preview-column" aria-label="液态玻璃交互演示">
+<div id="stage" class="stage">
+<canvas id="backdrop" class="source-canvas" aria-hidden="true"></canvas><canvas id="optics" class="optics-canvas" aria-hidden="true"></canvas>
+<div class="scene-ui">
+<form id="search-form" class="stage-top" role="search"><div class="glass search" data-glass="search"><svg><use href="#i-search"/></svg><input id="scene-search" aria-label="搜索背景：珊瑚、极光或棋盘" placeholder="寻找一种光…" autocomplete="off"><kbd>↵</kbd></div><button type="button" id="cycle-scene" class="glass round" data-glass="scene-button" aria-label="切换背景" title="切换背景"><svg><use href="#i-orbit"/></svg></button></form>
+<span class="scene-tag">THE LIGHT PLAYGROUND</span><span class="scene-count mono" id="scene-number">01 — 03</span>
+<div id="lens" class="glass lens" data-glass="lens" tabindex="0" role="group" aria-label="可移动玻璃透镜" aria-describedby="lens-help"><span class="lens-title">Liquid.</span><span class="lens-caption"><svg><use href="#i-move"/></svg>拖动，感受折射</span></div>
+<span class="sr-only" id="lens-help">拖动或用方向键移动这块玻璃，按住 Shift 可加速。旁边的加号可切换两块玻璃的融合。</span>
+<button id="drop" class="glass round drop" data-glass="droplet" aria-label="融合两块玻璃" aria-pressed="false" title="点击，融合玻璃"><svg><use href="#i-plus"/></svg></button>
+<span class="fusion-hint" id="scene-hint">移动玻璃，或点击 ＋ 看它们融为一体</span>
+<div class="scene-bottom">
+<div class="scene-tools"><div class="glass light-control" data-glass="light"><svg><use href="#i-sun"/></svg><label class="sr-only" for="scene-light">背景亮度</label><input id="scene-light" class="glass-range" type="range" min="45" max="110" value="100" aria-label="背景亮度"></div><button id="glass-light-switch" class="glass glass-toggle" data-glass="toggle" role="switch" aria-checked="true" aria-label="动态光源" title="动态光源开关"><span class="toggle-knob"><svg><use href="#i-sun"/></svg></span></button><button id="favorite" class="glass round" data-glass="favorite" aria-label="收藏当前材质" aria-pressed="false" title="收藏当前材质"><svg><use href="#i-heart"/></svg></button></div>
+<nav class="glass segmented" data-glass="tabs" aria-label="背景选择"><span class="selection" aria-hidden="true"></span><button type="button" data-nav="coral" aria-pressed="true"><svg><use href="#i-sun"/></svg>珊瑚</button><button type="button" data-nav="aurora" aria-pressed="false"><svg><use href="#i-wave"/></svg>极光</button><button type="button" data-nav="grid" aria-pressed="false"><svg><use href="#i-grid"/></svg>棋盘</button></nav>
+</div><p class="fallback-note">当前设备已启用柔化玻璃模式，可继续体验控件与柔化材质。</p>
+</div></div>
+<div class="stage-footnote"><span class="demo-key"><i class="small-square"></i>拖动透镜 · 点击融合 · 切换背景</span><span class="mono" id="engine-label">2D REFRACTION / WEBGL</span></div>
+</section>
+<aside class="inspector" aria-labelledby="panel-title"><div class="panel-heading"><h2 id="panel-title">材质调校</h2><label class="tint-control" for="tint">底色 <input id="tint" type="color" value="#f8fcff" aria-label="玻璃底色" title="调整玻璃底色"></label></div>
+<div class="presets-section"><div class="section-label">材质预设 <span id="preset-label" class="mono">01</span></div><div class="preset-row" aria-label="材质预设"><button data-preset="clear" aria-pressed="true">清透</button><button data-preset="soft" aria-pressed="false">柔雾</button><button data-preset="prism" aria-pressed="false">棱镜</button></div></div>
+<div class="param-group">
+<div class="parameter"><div class="parameter-head"><label for="refraction">折射强度</label><output for="refraction" id="refraction-value">24 px</output></div><input class="range" id="refraction" type="range" min="0" max="48" step="1" value="24"></div>
+<div class="parameter"><div class="parameter-head"><label for="thickness">边缘厚度</label><output for="thickness" id="thickness-value">18 px</output></div><input class="range" id="thickness" type="range" min="4" max="36" step="1" value="18"></div>
+<div class="parameter"><div class="parameter-head"><label for="blur">柔化程度</label><output for="blur" id="blur-value">1.2 px</output></div><input class="range" id="blur" type="range" min="0" max="8" step="0.1" value="1.2"></div>
+<div class="parameter"><div class="parameter-head"><label for="dispersion">边缘色散</label><output for="dispersion" id="dispersion-value">0.8 px</output></div><input class="range" id="dispersion" type="range" min="0" max="4" step="0.1" value="0.8"></div>
+</div>
+<div class="options-group"><div class="divider"></div><div class="switch-row"><div class="switch-copy"><label id="follow-label" for="follow-light">跟随光源</label><p>高光随指针流转</p></div><button id="follow-light" class="switch" role="switch" aria-checked="true" aria-labelledby="follow-label"></button></div><div class="switch-row"><div class="switch-copy"><label id="adaptive-label" for="adaptive">自适应清晰度</label><p>面积越大，柔化越明显</p></div><button id="adaptive" class="switch" role="switch" aria-checked="true" aria-labelledby="adaptive-label"></button></div><div class="section-label">选择背景 <span class="mono" id="scene-name">CORAL</span></div><div class="scene-choices" aria-label="选择背景"><button class="scene-choice scene-coral" data-scene="coral" aria-label="珊瑚背景" aria-pressed="true" title="珊瑚"></button><button class="scene-choice scene-aurora" data-scene="aurora" aria-label="极光背景" aria-pressed="false" title="极光"></button><button class="scene-choice scene-grid" data-scene="grid" aria-label="棋盘背景，便于观察折射" aria-pressed="false" title="棋盘"></button><button id="upload-image" class="scene-choice scene-upload" aria-label="使用自己的背景图片" title="使用自己的图片"><svg><use href="#i-plus"/></svg></button></div><input id="image-file" type="file" accept="image/*" hidden></div>
+<div class="panel-bottom"><button id="reset" class="reset"><svg><use href="#i-reset"/></svg>恢复默认</button><span class="value-chip" id="material-state">CLEAR / V.01</span></div></aside>
+</div>
+<section class="caption-grid" aria-label="材质体验说明"><div class="caption-item"><span class="num">01 /</span><div><h3>光线在边缘弯折</h3><p>透过玻璃看背景，感受透镜的放大与拉伸。</p></div></div><div class="caption-item"><span class="num">02 /</span><div><h3>形状可以自然流动</h3><p>让两块玻璃靠近，连接处的光也随之融合。</p></div></div><div class="caption-item"><span class="num">03 /</span><div><h3>把材质交到你手里</h3><p>调整参数，换一张背景，找到恰好的通透感。</p></div></div></section>
+</main><footer class="page-footer"><span>FORM — AN EXPLORATION IN DIGITAL MATERIALS</span><span>HTML · CSS · JAVASCRIPT</span></footer>
+</div><div id="toast" class="toast" role="status" aria-live="polite"></div>
+<noscript><p style="padding:20px;text-align:center">请启用 JavaScript，以体验液态玻璃折射和交互控件。</p></noscript>
+<script>
+'use strict';
+/*
+ * LIQUID GLASS / Native Web reference implementation
+ * ------------------------------------------------
+ * No dependencies, no image downloads, no build step. Open this file directly.
+ * This implements a controlled 2D lens model, not Apple's private rendering code.
+ *
+ * Rendering contract:
+ *   1. Supply a background canvas/image that you own (texImage2D source).
+ *   2. Register DOM rectangles. Geometry is measured in CSS pixels.
+ *   3. The shader bends only the source texture, never the foreground HTML.
+ * WebGL CANNOT read arbitrary DOM behind a canvas. To use this on a real page,
+ * put the relevant background in the same scene or supply a composited texture.
+ * The fallback is deliberately frosted glass; it does not claim to refract.
+ *
+ * Analytic displacement field = generating an RG displacement map on the GPU:
+ * output(p) = background(p + displacement(p))
+ * R controls X; G controls Y; inverse sampling reverses apparent image movement.
+ */
+(function(){
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const stage=$('#stage'), source=$('#backdrop'), output=$('#optics');
+const events=new AbortController();
+function on(target,type,handler,options={}){target.addEventListener(type,handler,{...options,signal:events.signal});}
+const motionQuery=matchMedia('(prefers-reduced-motion: reduce)');
+const presets={clear:{refraction:24,thickness:18,blur:1.2,dispersion:.8},soft:{refraction:16,thickness:24,blur:5.5,dispersion:.3},prism:{refraction:36,thickness:13,blur:.3,dispersion:2.8}};
+const defaults={...presets.clear,followLight:!motionQuery.matches,adaptive:true,brightness:1,tint:'#f8fcff',scene:'coral',fusion:false};
+let state={...defaults}, currentPreset='clear', customImage=null, customURL=null, imageRequest=0, toastTimer=0;
+let width=0,height=0,lensX=0,lensY=0,dropX=0,dropY=0,fusionMix=0,dropSide='right';
+let pointer={x:.26,y:.17}, dirty=true, frameId=0, lastFrame=0, animatingUntil=0, needsMeasure=true, disposed=false;
+const reduceMotion=()=>motionQuery.matches;
+function toast(text){const el=$('#toast');el.textContent=text;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),2700);}
+function invalidate(measure=false,duration=0){dirty=true;needsMeasure=needsMeasure||measure;animatingUntil=Math.max(animatingUntil,performance.now()+duration);if(!frameId&&!disposed&&!document.hidden)frameId=requestAnimationFrame(tick);}
+function roundedPath(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+/* The art is a native Canvas composition, also used as the refraction source.
+ * Padding supplies real pixels outside the viewport to prevent clamped streaks. */
+const PAD=80;
+function drawBackground(){
+ if(!width||!height)return;
+ const dpr=Math.min(window.devicePixelRatio||1,1.75), texW=width+PAD*2,texH=height+PAD*2;
+ source.width=Math.round(texW*dpr);source.height=Math.round(texH*dpr);
+ source.style.cssText='position:absolute;left:-'+PAD+'px;top:-'+PAD+'px;width:'+texW+'px;height:'+texH+'px;z-index:0;pointer-events:none';
+ const c=source.getContext('2d');c.setTransform(source.width/texW,0,0,source.height/texH,PAD*source.width/texW,PAD*source.height/texH);
+ const W=width,H=height;
+ if(state.scene==='custom'&&customImage){
+  c.fillStyle='#56534f';c.fillRect(-PAD,-PAD,texW,texH);
+  const scale=Math.max(texW/customImage.naturalWidth,texH/customImage.naturalHeight);
+  const iw=customImage.naturalWidth*scale,ih=customImage.naturalHeight*scale;
+  c.drawImage(customImage,(W-iw)/2,(H-ih)/2,iw,ih);
+  c.fillStyle='#11101822';c.fillRect(-PAD,-PAD,texW,texH);
+ }else if(state.scene==='grid'){
+  c.fillStyle='#9da997';c.fillRect(-PAD,-PAD,texW,texH);
+  const size=32;
+  for(let x=-PAD-size;x<W+PAD+size;x+=size)for(let y=-PAD-size;y<H+PAD+size;y+=size){
+   const even=(Math.round((x+PAD)/size)+Math.round((y+PAD)/size))%2===0;c.fillStyle=even?'#b7c1aa':'#546350';c.fillRect(x,y,size,size);
+  }
+  c.strokeStyle='#ffffff1f';c.lineWidth=1;
+  for(let x=0;x<W;x+=128){c.beginPath();c.moveTo(x,-PAD);c.lineTo(x,H+PAD);c.stroke();}
+  for(let y=0;y<H;y+=128){c.beginPath();c.moveTo(-PAD,y);c.lineTo(W+PAD,y);c.stroke();}
+ }else{
+  const a=state.scene==='aurora';
+  let g=c.createLinearGradient(0,-PAD,W*.65,H);g.addColorStop(0,a?'#aaa8cd':'#bfb8d4');g.addColorStop(.32,a?'#8b93b0':'#e8aaa2');g.addColorStop(.7,a?'#618e85':'#d26874');g.addColorStop(1,a?'#173e42':'#853855');c.fillStyle=g;c.fillRect(-PAD,-PAD,texW,texH);
+  g=c.createRadialGradient(W*.12,H*.10,5,W*.12,H*.10,W*.76);g.addColorStop(0,a?'#ded7f3ee':'#fff1dbe8');g.addColorStop(.55,a?'#c6bdde55':'#ffccb277');g.addColorStop(1,'#ffffff00');c.fillStyle=g;c.fillRect(-PAD,-PAD,texW,texH);
+  // A broad folded surface, with a crisp edge that makes lens displacement legible.
+  c.beginPath();c.moveTo(-PAD,H*.58);c.bezierCurveTo(W*.21,H*.45,W*.30,H*.49,W*.46,H*.68);c.bezierCurveTo(W*.64,H*.93,W*.78,H*.23,W+PAD,H*.34);c.lineTo(W+PAD,H+PAD);c.lineTo(-PAD,H+PAD);c.closePath();
+  g=c.createLinearGradient(W*.1,H*.42,W*.72,H*.90);g.addColorStop(0,a?'#658372':'#c7788a');g.addColorStop(.32,a?'#c9d3a0':'#edb098');g.addColorStop(.53,a?'#778a71':'#ca5464');g.addColorStop(.66,a?'#273d45':'#68213c');g.addColorStop(1,a?'#172d3e':'#471b38');c.fillStyle=g;c.fill();
+  c.beginPath();c.moveTo(-PAD,H*.83);c.bezierCurveTo(W*.22,H*.74,W*.41,H*1.08,W*.62,H*.69);c.bezierCurveTo(W*.81,H*.34,W*.86,H*.37,W+PAD,H*.30);c.lineTo(W+PAD,H+PAD);c.lineTo(-PAD,H+PAD);c.closePath();
+  g=c.createLinearGradient(W*.50,H*.47,W*.74,H*1.02);g.addColorStop(0,a?'#f1ebc0':'#ffe1a8');g.addColorStop(.13,a?'#a9c896':'#fbb085');g.addColorStop(.48,a?'#729c8d':'#ec8b63');g.addColorStop(1,a?'#284750':'#a64452');c.fillStyle=g;c.fill();
+  c.save();c.globalCompositeOperation='screen';g=c.createRadialGradient(W*.78,H*.69,0,W*.78,H*.69,W*.44);g.addColorStop(0,a?'#a3dfb025':'#ffbc6d2c');g.addColorStop(1,'#ffffff00');c.fillStyle=g;c.fillRect(-PAD,-PAD,texW,texH);c.restore();
+ }
+ if(state.scene!=='custom'){
+  c.save();c.fillStyle=state.scene==='grid'?'#ffffffe0':'#fffbf2df';
+  const fontSize=Math.min(W*.142,122);c.font='500 '+fontSize+'px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';c.textBaseline='alphabetic';
+  c.fillText('Make room',W*.096,H*.365);c.fillText('for light.',W*.096,H*.365+fontSize*1.02);
+  c.fillStyle='#ffffffc0';c.font='9px -apple-system, BlinkMacSystemFont, sans-serif';c.fillText('A LITTLE LESS SOLID. A LITTLE MORE POSSIBILITY.',W*.10,H*.365+fontSize*1.02+31);c.restore();
+ }
+ // Deterministic fine grain, generated once, never animated.
+ const grain=document.createElement('canvas');grain.width=grain.height=128;const gc=grain.getContext('2d'), pixels=gc.createImageData(128,128);let seed=127;
+ for(let i=0;i<pixels.data.length;i+=4){seed=(seed*1664525+1013904223)>>>0;const v=(seed>>>24);pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=v;pixels.data[i+3]=12;}
+ gc.putImageData(pixels,0,0);c.save();c.globalCompositeOperation='soft-light';c.fillStyle=c.createPattern(grain,'repeat');c.fillRect(-PAD,-PAD,texW,texH);c.restore();
+ if(engine&&engine.active)engine.upload(source);
+ source.style.filter='brightness('+state.brightness+')';
+ invalidate();
+}
+
+/* Reusable material renderer. All uniforms use CSS pixels, including blur.
+ * To reuse: instantiate with a canvas; call resize(), upload(), setShapes(),
+ * render(options, lightPosition); call destroy() when removing the scene. */
+class LiquidGlassRenderer{
+ constructor(canvas){
+  this.canvas=canvas;this.active=false;this.count=0;this.dpr=1;this.shapes=[];this.uniforms={};this.maxShapes=10;
+  this.gl=canvas.getContext('webgl',{alpha:false,antialias:false,depth:false,stencil:false,premultipliedAlpha:false,preserveDrawingBuffer:false,powerPreference:'low-power'});
+  if(!this.gl)return;
+  this.init();
+ }
+ init(){
+  const gl=this.gl;
+  const vertex='attribute vec2 a_position; varying vec2 v_uv; void main(){v_uv=a_position*.5+.5;gl_Position=vec4(a_position,0.,1.);}';
+  const fragment=`
+  #ifdef GL_FRAGMENT_PRECISION_HIGH
+  precision highp float;
+  #else
+  precision mediump float;
+  #endif
+  varying vec2 v_uv;
+  uniform sampler2D u_texture;
+  uniform vec2 u_resolution;
+  uniform float u_pad;
+  uniform vec4 u_rects[10];
+  uniform vec2 u_styles[10];
+  uniform int u_count;
+  uniform float u_refraction,u_thickness,u_blur,u_dispersion,u_adaptive,u_brightness,u_dpr;
+  uniform vec2 u_light;
+  uniform vec3 u_tint;
+  vec3 background(vec2 p){
+   vec2 uv=(p+vec2(u_pad))/(u_resolution+vec2(u_pad*2.));
+   return texture2D(u_texture,clamp(uv,vec2(.001),vec2(.999))).rgb*u_brightness;
+  }
+  // Rounded rectangle SDF, plus its analytic gradient (outward normal).
+  vec3 roundBox(vec2 p,vec2 halfSize,float radius){
+   vec2 q=abs(p)-halfSize+vec2(radius);
+   vec2 o=max(q,0.);float len=length(o);
+   float d=len+min(max(q.x,q.y),0.)-radius;
+   vec2 n=len>.0001?o/max(len,.0001):(q.x>q.y?vec2(1.,0.):vec2(0.,1.));
+   return vec3(d,n*sign(p+vec2(.00001)));
+  }
+  void main(){
+   vec2 p=vec2(v_uv.x,1.-v_uv.y)*u_resolution;
+   vec3 base=background(p);
+   float d=10000.;vec2 gradient=vec2(0.,-1.);vec2 local=vec2(0.);vec2 halfSize=vec2(1.);float materialArea=1.;
+   for(int i=0;i<10;i++){
+    if(i>=u_count)break;
+    vec4 r=u_rects[i];vec2 lp=p-r.xy;vec3 field=roundBox(lp,r.zw,u_styles[i].x);
+    if(i==1){
+     // Smooth minimum merges only the first pair (lens + droplet).
+     // Blend unnormalized gradients/local coordinates to avoid an internal seam.
+     float k=22.;float h=clamp(.5+.5*(field.x-d)/k,0.,1.);
+     d=mix(field.x,d,h)-k*h*(1.-h);
+     gradient=mix(field.yz,gradient,h);local=mix(lp,local,h);halfSize=mix(r.zw,halfSize,h);
+     materialArea=mix(r.z*r.w*4.,materialArea,h);
+    }else if(field.x<d){d=field.x;gradient=field.yz;local=lp;halfSize=r.zw;materialArea=r.z*r.w*4.;}
+   }
+   // A shallow ambient shadow helps separate the material from the source.
+   float outside=max(d,0.);
+   float shadow=exp(-outside/8.)*.16;
+   base*=1.-shadow;
+   if(d>1.5){gl_FragColor=vec4(base,1.);return;}
+   float aa=max(.65,1./u_dpr);
+   float mask=1.-smoothstep(-aa,aa,d);
+   float depth=max(-d,0.);
+   float rimWidth=min(u_thickness,min(halfSize.x,halfSize.y)*.92);
+   float t=clamp(depth/max(rimWidth,1.),0.,1.);
+   float edge=(1.-t)*(1.-t);
+   // Preserve a smooth near-zero gradient at the fused neck; normalizing it
+   // without a floor creates a visible refraction seam when surfaces meet.
+   vec2 n=gradient/max(length(gradient),.35);
+   float amount=u_refraction;
+   float strength=min(1.,min(halfSize.x,halfSize.y)/27.);
+   // Inverse sampling: a gently magnified center + a compressed convex rim.
+   vec2 centerShift=-local*.038*(amount/24.)*(1.-edge);
+   vec2 displacement=centerShift-n*amount*edge*strength;
+   vec2 sampleP=p+displacement;
+   // Adaptive scattering is linked to each control's scene area fraction.
+   float areaRatio=materialArea/(u_resolution.x*u_resolution.y);
+   float areaWeight=smoothstep(.012,.11,areaRatio)*u_adaptive;
+   float blur=u_blur*(.7+areaWeight*.8);
+   vec3 color=background(sampleP)*.25;
+   // Symmetric 9-tap approximation; never blurs foreground HTML.
+   color+=(background(sampleP+vec2(blur,0.))+background(sampleP-vec2(blur,0.))+background(sampleP+vec2(0.,blur))+background(sampleP-vec2(0.,blur)))*.125;
+   color+=(background(sampleP+vec2(blur,blur))+background(sampleP+vec2(-blur,blur))+background(sampleP+vec2(blur,-blur))+background(sampleP-vec2(blur,blur)))*.0625;
+   // Chromatic separation is confined to the rim; 0 really disables it.
+   float chroma=u_dispersion*edge*(amount/24.);
+   if(chroma>.005){vec3 redSample=background(sampleP+n*chroma);vec3 blueSample=background(sampleP-n*chroma);color.r=mix(color.r,redSample.r,.8);color.b=mix(color.b,blueSample.b,.8);}
+   float luminance=dot(color,vec3(.2126,.7152,.0722));
+   color=mix(vec3(luminance),color,1.10);
+   color=mix(color,u_tint,.055+areaWeight*.07+u_blur*.006);
+   // A sloped height-field normal catches a moving light; no 3D scene required.
+   vec3 normal3=normalize(vec3(n*pow(1.-t,1.35)*.85,.62));
+   vec2 light2=normalize((u_light-p)/u_resolution+vec2(.0001));
+   vec3 light3=normalize(vec3(light2*.8,1.));
+   vec3 halfVector=normalize(light3+vec3(0.,0.,1.));
+   float spec=pow(max(dot(normal3,halfVector),0.),30.);
+   float fresnel=pow(1.-normal3.z,2.);
+   float border=exp(-depth/1.1);
+   float facing=dot(n,light2)*.5+.5;
+   color+=vec3(1.,.98,.94)*(spec*.15*edge+border*(.16+facing*.43)+fresnel*.12);
+   color-=vec3(.065,.047,.051)*edge*(1.-facing);
+   gl_FragColor=vec4(mix(base,clamp(color,0.,1.),mask),1.);
+  }`;
+  const compile=(type,text)=>{const shader=gl.createShader(type);gl.shaderSource(shader,text);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)){const msg=gl.getShaderInfoLog(shader);gl.deleteShader(shader);throw new Error('GLSL: '+msg);}return shader;};
+  const v=compile(gl.VERTEX_SHADER,vertex),f=compile(gl.FRAGMENT_SHADER,fragment),program=gl.createProgram();gl.attachShader(program,v);gl.attachShader(program,f);gl.linkProgram(program);gl.deleteShader(v);gl.deleteShader(f);
+  if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error('WebGL link: '+gl.getProgramInfoLog(program));
+  this.program=program;gl.useProgram(program);this.buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const attr=gl.getAttribLocation(program,'a_position');gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,2,gl.FLOAT,false,0,0);
+  const names=['u_texture','u_resolution','u_pad','u_rects[0]','u_styles[0]','u_count','u_refraction','u_thickness','u_blur','u_dispersion','u_adaptive','u_brightness','u_dpr','u_light','u_tint'];
+  names.forEach(n=>this.uniforms[n]=gl.getUniformLocation(program,n));
+  this.texture=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,this.texture);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.uniform1i(this.uniforms.u_texture,0);gl.uniform1f(this.uniforms.u_pad,PAD);
+  this.active=true;
+ }
+ resize(w,h){if(!this.active)return;const gl=this.gl;this.dpr=Math.min(window.devicePixelRatio||1,1.75);this.width=w;this.height=h;this.canvas.width=Math.round(w*this.dpr);this.canvas.height=Math.round(h*this.dpr);gl.viewport(0,0,this.canvas.width,this.canvas.height);gl.uniform2f(this.uniforms.u_resolution,w,h);gl.uniform1f(this.uniforms.u_dpr,this.dpr);}
+ upload(image){if(!this.active)return;const gl=this.gl;gl.bindTexture(gl.TEXTURE_2D,this.texture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);}
+ setShapes(items){if(!this.active)return;this.shapes=items.slice(0,this.maxShapes);this.count=this.shapes.length;const rects=new Float32Array(this.maxShapes*4),styles=new Float32Array(this.maxShapes*2);this.shapes.forEach((s,i)=>{rects.set([s.x+s.width/2,s.y+s.height/2,s.width/2,s.height/2],i*4);styles.set([Math.min(s.radius,s.width/2,s.height/2),0],i*2);});this.gl.uniform4fv(this.uniforms['u_rects[0]'],rects);this.gl.uniform2fv(this.uniforms['u_styles[0]'],styles);this.gl.uniform1i(this.uniforms.u_count,this.count);}
+ render(options,light){if(!this.active)return;const gl=this.gl,u=this.uniforms;gl.useProgram(this.program);gl.uniform1f(u.u_refraction,options.refraction);gl.uniform1f(u.u_thickness,options.thickness);gl.uniform1f(u.u_blur,options.blur);gl.uniform1f(u.u_dispersion,options.dispersion);gl.uniform1f(u.u_adaptive,options.adaptive?1:0);gl.uniform1f(u.u_brightness,options.brightness);const tint=options.tint.match(/[a-f0-9]{2}/gi).map(x=>parseInt(x,16)/255);gl.uniform3f(u.u_tint,...tint);gl.uniform2f(u.u_light,light.x*this.width,light.y*this.height);gl.drawArrays(gl.TRIANGLES,0,6);}
+ destroy(){this.active=false;if(!this.gl)return;this.gl.deleteBuffer(this.buffer);this.gl.deleteTexture(this.texture);this.gl.deleteProgram(this.program);}
+}
+// Exposed for reuse in other native Web projects.
+window.LiquidGlassRenderer=LiquidGlassRenderer;
+let engine=null;
+try{engine=new LiquidGlassRenderer(output);}catch(error){console.warn('Liquid Glass renderer unavailable:',error.message);}
+function setFallback(){stage.classList.add('no-webgl');$('#render-status').textContent='柔化玻璃';$('#engine-label').textContent='FROSTED FALLBACK';['refraction','thickness','dispersion'].forEach(k=>$('#'+k).disabled=true);}
+if(!engine||!engine.active)setFallback();
+
+const lens=$('#lens'), drop=$('#drop');
+// The fusion pair must be first. All other surfaces remain independent.
+const surfaces=[lens,drop,...$$('[data-glass]').filter(e=>e!==lens&&e!==drop)];
+function syncGeometry(){
+ if(!engine||!engine.active)return;
+ const root=stage.getBoundingClientRect();const shapes=surfaces.filter(el=>el.getClientRects().length).map(el=>{const b=el.getBoundingClientRect();let r=parseFloat(getComputedStyle(el).borderTopLeftRadius);if(getComputedStyle(el).borderTopLeftRadius.includes('%'))r=Math.min(b.width,b.height)/2;return{x:b.left-root.left,y:b.top-root.top,width:b.width,height:b.height,radius:r||0};});
+ engine.setShapes(shapes);
+}
+function positionLens(){lens.style.left=lensX+'px';lens.style.top=lensY+'px';}
+function dropletTarget(){
+ const lw=lens.offsetWidth,lh=lens.offsetHeight,dw=drop.offsetWidth,gap=width<360?16:24;
+ const free={right:width-17-lensX-lw,left:lensX-17,top:lensY-92,bottom:height-174-lensY-lh};
+ // Keep the pair separable near every viewport edge, including narrow phones.
+ if(!state.fusion&&free[dropSide]<dw+gap)dropSide=Object.keys(free).sort((a,b)=>free[b]-free[a])[0];
+ const spacing=(1-fusionMix)*gap-fusionMix*(dw*.36);
+ const p={x:lensX+lw/2-dw/2,y:lensY+lh/2-dw/2};
+ if(dropSide==='right')p.x=lensX+lw+spacing;
+ if(dropSide==='left')p.x=lensX-dw-spacing;
+ if(dropSide==='top')p.y=lensY-dw-spacing;
+ if(dropSide==='bottom')p.y=lensY+lh+spacing;
+ return p;
+}
+function positionDrop(){const p=dropletTarget();dropX=p.x;dropY=p.y;drop.style.left=dropX+'px';drop.style.top=dropY+'px';}
+function clampLens(){const dw=drop.offsetWidth,gap=width<360?16:24;const ext=state.fusion?dw+(1-fusionMix)*gap-fusionMix*(dw*.36):0;const loX=17+(dropSide==='left'?ext:0),hiX=width-lens.offsetWidth-17-(dropSide==='right'?ext:0);const loY=105+(dropSide==='top'?ext:0),hiY=height-lens.offsetHeight-186-(dropSide==='bottom'?ext:0);lensX=Math.max(loX,Math.min(hiX,lensX));lensY=Math.max(loY,Math.min(hiY,lensY));}
+function layout(initial=false){const b=stage.getBoundingClientRect(),oldW=width,oldH=height;width=b.width;height=b.height;if(!width||!height)return;if(initial||!oldW){lensX=width<520?width*.19:width*.35;lensY=height*.39;}else{lensX=lensX/oldW*width;lensY=lensY/oldH*height;}clampLens();positionLens();positionDrop();if(engine&&engine.active)engine.resize(width,height);drawBackground();invalidate(true);}
+function tick(time){
+ frameId=0;if(disposed||document.hidden)return;
+ const dt=lastFrame?Math.min((time-lastFrame)/1000,.05):.016;lastFrame=time;
+ const target=state.fusion?1:0;
+ if(Math.abs(fusionMix-target)>.001){fusionMix=reduceMotion()?target:fusionMix+(target-fusionMix)*(1-Math.exp(-dt*12));positionDrop();dirty=true;needsMeasure=true;}else if(fusionMix!==target){fusionMix=target;positionDrop();dirty=true;needsMeasure=true;}
+ if(needsMeasure){syncGeometry();needsMeasure=false;}
+ if(dirty&&engine&&engine.active)engine.render(state,state.followLight?pointer:{x:.22,y:.08});
+ dirty=false;
+ if(Math.abs(fusionMix-target)>.001||time<animatingUntil){dirty=true;frameId=requestAnimationFrame(tick);}
+}
+function setScene(name){if(!['coral','aurora','grid','custom'].includes(name))return;if(name==='custom'&&!customImage)return;state.scene=name;$$('[data-scene]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.scene===name)));$$('[data-nav]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.nav===name)));const index=['coral','aurora','grid'].indexOf(name);$('.selection').style.opacity=index<0?'0':'1';$('.selection').style.transform='translateX('+(Math.max(index,0)*103)+'%)';$('#scene-name').textContent=name.toUpperCase();$('#scene-number').textContent=index<0?'YOUR — SCENE':'0'+(index+1)+' — 03';drawBackground();clearFavorite();}
+function syncRanges(){stage.style.setProperty('--fallback-blur',state.blur+'px');stage.style.setProperty('--fallback-tint',state.tint+'26');$('#tint').value=state.tint;['refraction','thickness','blur','dispersion'].forEach(key=>{const el=$('#'+key);el.value=state[key];el.style.setProperty('--fill',((state[key]-Number(el.min))/(Number(el.max)-Number(el.min))*100)+'%');$('#'+key+'-value').textContent=(Number.isInteger(state[key])?state[key]:state[key].toFixed(1))+' px';el.setAttribute('aria-valuetext',state[key]+' 像素');});}
+function clearFavorite(){$('#favorite').setAttribute('aria-pressed','false');$('#favorite svg').style.fill='none';}
+function setPreset(name){if(!presets[name])return;Object.assign(state,presets[name]);currentPreset=name;$$('[data-preset]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.preset===name)));$('#preset-label').textContent='0'+(['clear','soft','prism'].indexOf(name)+1);$('#material-state').textContent=name.toUpperCase()+' / V.01';syncRanges();clearFavorite();invalidate();}
+['refraction','thickness','blur','dispersion'].forEach(key=>on($('#'+key),'input',event=>{state[key]=Number(event.target.value);currentPreset='custom';$$('[data-preset]').forEach(b=>b.setAttribute('aria-pressed','false'));$('#preset-label').textContent='—';$('#material-state').textContent='CUSTOM / V.01';syncRanges();clearFavorite();invalidate();}));
+$$('[data-preset]').forEach(b=>on(b,'click',()=>setPreset(b.dataset.preset)));
+$$('[data-scene]').forEach(b=>on(b,'click',()=>setScene(b.dataset.scene)));
+$$('[data-nav]').forEach(b=>on(b,'click',()=>setScene(b.dataset.nav)));
+on($('#cycle-scene'),'click',()=>{const names=['coral','aurora','grid'];setScene(names[(names.indexOf(state.scene)+1)%3]);});
+function setFollow(on){state.followLight=on;$('#follow-light').setAttribute('aria-checked',String(on));$('#glass-light-switch').setAttribute('aria-checked',String(on));invalidate();}
+on($('#follow-light'),'click',()=>setFollow(!state.followLight));on($('#glass-light-switch'),'click',()=>setFollow(!state.followLight));
+on($('#adaptive'),'click',()=>{state.adaptive=!state.adaptive;$('#adaptive').setAttribute('aria-checked',String(state.adaptive));clearFavorite();invalidate();});
+on($('#tint'),'input',e=>{state.tint=e.target.value;syncRanges();clearFavorite();invalidate();});
+on($('#scene-light'),'input',e=>{state.brightness=Number(e.target.value)/100;source.style.filter='brightness('+state.brightness+')';invalidate();});
+on(stage,'pointermove',e=>{if(!state.followLight)return;const b=stage.getBoundingClientRect();pointer={x:(e.clientX-b.left)/b.width,y:(e.clientY-b.top)/b.height};invalidate();},{passive:true});
+on(stage,'pointerleave',()=>{pointer={x:.26,y:.17};invalidate();},{passive:true});
+let drag=null;
+on(lens,'pointerdown',e=>{if(e.button!==0)return;e.preventDefault();lens.focus({preventScroll:true});drag={id:e.pointerId,x:e.clientX,y:e.clientY,originX:lensX,originY:lensY};lens.setPointerCapture(e.pointerId);lens.classList.add('dragging');});
+on(lens,'pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;lensX=drag.originX+e.clientX-drag.x;lensY=drag.originY+e.clientY-drag.y;clampLens();positionLens();positionDrop();invalidate(true);});
+function endDrag(){drag=null;lens.classList.remove('dragging');}
+on(lens,'pointerup',endDrag);on(lens,'pointercancel',endDrag);on(lens,'lostpointercapture',endDrag);
+on(lens,'keydown',e=>{const step=e.shiftKey?24:8;const movement={ArrowLeft:[-step,0],ArrowRight:[step,0],ArrowUp:[0,-step],ArrowDown:[0,step]}[e.key];if(!movement)return;e.preventDefault();lensX+=movement[0];lensY+=movement[1];clampLens();positionLens();positionDrop();invalidate(true);});
+on(drop,'click',()=>{state.fusion=!state.fusion;clampLens();positionLens();positionDrop();drop.setAttribute('aria-pressed',String(state.fusion));drop.setAttribute('aria-label',state.fusion?'分离两块玻璃':'融合两块玻璃');$('#scene-hint').textContent=state.fusion?'两个轮廓，一片连续的光。再次点击即可分离。':'移动玻璃，或点击 ＋ 看它们融为一体';invalidate(true,reduceMotion()?0:650);});
+on($('#search-form'),'submit',e=>{e.preventDefault();const q=$('#scene-search').value.trim().toLowerCase();const names={coral:['珊瑚','日落','暖','coral','sunset'],aurora:['极光','冷','aurora','green'],grid:['棋盘','网格','grid','check']};const found=Object.keys(names).find(k=>names[k].some(term=>q.includes(term)));if(found){setScene(found);toast('已切换到'+{coral:'珊瑚',aurora:'极光',grid:'棋盘'}[found]+'背景');}else toast('试试搜索「珊瑚」「极光」或「棋盘」');});
+on($('#upload-image'),'click',()=>$('#image-file').click());
+on($('#image-file'),'change',e=>{
+ const file=e.target.files[0];if(!file)return;
+ if(!file.type.startsWith('image/')){toast('请选择一张图片');e.target.value='';return;}
+ if(file.size>20*1024*1024){toast('请选择 20 MB 以内的图片');e.target.value='';return;}
+ const request=++imageRequest,url=URL.createObjectURL(file),img=new Image();
+ img.onload=()=>{if(disposed||request!==imageRequest){URL.revokeObjectURL(url);return;}if(customURL)URL.revokeObjectURL(customURL);customURL=url;customImage=img;setScene('custom');toast('已换上你的背景');};
+ img.onerror=()=>{URL.revokeObjectURL(url);if(disposed||request!==imageRequest)return;toast('浏览器无法读取这张图片，请尝试 PNG、JPEG 或 WebP');};img.src=url;e.target.value='';
+});
+function exportedConfig(){return{version:1,model:'2d-sdf-displacement',refraction:state.refraction,thickness:state.thickness,blur:state.blur,dispersion:state.dispersion,adaptive:state.adaptive,followLight:state.followLight,brightness:state.brightness,tint:state.tint,scene:state.scene,fusion:state.fusion,units:'CSS pixels'};}
+function downloadJSON(data,filename){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
+on($('#export-config'),'click',()=>{downloadJSON(exportedConfig(),'liquid-glass-config.json');toast('材质参数已导出');});
+on($('#favorite'),'click',()=>{const selected=$('#favorite').getAttribute('aria-pressed')==='true';if(selected){clearFavorite();try{localStorage.removeItem('liquid-glass-favorite');}catch{}toast('已取消收藏');return;}try{localStorage.setItem('liquid-glass-favorite',JSON.stringify(exportedConfig()));$('#favorite').setAttribute('aria-pressed','true');$('#favorite svg').style.fill='#ffffffcf';toast('材质参数已收藏到这个浏览器');}catch{downloadJSON(exportedConfig(),'liquid-glass-favorite.json');toast('已将收藏保存为参数文件');}});
+on($('#reset'),'click',()=>{imageRequest++;if(customURL){URL.revokeObjectURL(customURL);customURL=null;}customImage=null;state={...defaults,followLight:!reduceMotion()};fusionMix=0;dropSide='right';drop.setAttribute('aria-pressed','false');drop.setAttribute('aria-label','融合两块玻璃');$('#scene-hint').textContent='移动玻璃，或点击 ＋ 看它们融为一体';$('#adaptive').setAttribute('aria-checked','true');$('#scene-light').value=100;$('#scene-search').value='';pointer={x:.26,y:.17};setFollow(state.followLight);setPreset('clear');setScene('coral');layout(true);toast('已恢复默认材质');});
+on(motionQuery,'change',()=>{document.body.classList.toggle('reduced',reduceMotion());if(reduceMotion())setFollow(false);invalidate(true);});
+document.body.classList.toggle('reduced',reduceMotion());
+on(document,'visibilitychange',()=>{if(document.hidden){if(frameId)cancelAnimationFrame(frameId);frameId=0;lastFrame=0;}else invalidate(true);});
+on(output,'webglcontextlost',e=>{e.preventDefault();if(engine)engine.active=false;setFallback();});
+on(output,'webglcontextrestored',()=>{if(disposed||!engine)return;try{engine.init();stage.classList.remove('no-webgl');['refraction','thickness','dispersion'].forEach(k=>$('#'+k).disabled=false);$('#render-status').textContent='实时折射';$('#engine-label').textContent='2D REFRACTION / WEBGL';engine.resize(width,height);engine.upload(source);invalidate(true);}catch{setFallback();}});
+const observer=new ResizeObserver(()=>layout());observer.observe(stage);
+on(window,'resize',()=>layout(),{passive:true});
+on(window,'pagehide',()=>{if(frameId)cancelAnimationFrame(frameId);frameId=0;});
+on(window,'pageshow',()=>invalidate(true));
+
+function restoreFavorite(){
+ try{
+  const saved=JSON.parse(localStorage.getItem('liquid-glass-favorite')||'null');
+  if(!saved||saved.version!==1)return;
+  for(const key of ['refraction','thickness','blur','dispersion']){const el=$('#'+key);if(typeof saved[key]==='number'&&Number.isFinite(saved[key]))state[key]=Math.max(Number(el.min),Math.min(Number(el.max),saved[key]));}
+  if(typeof saved.adaptive==='boolean')state.adaptive=saved.adaptive;
+  if(typeof saved.brightness==='number'&&Number.isFinite(saved.brightness))state.brightness=Math.max(.45,Math.min(1.1,saved.brightness));
+  if(typeof saved.tint==='string'&&/^#[a-f0-9]{6}$/i.test(saved.tint))state.tint=saved.tint;
+  setFollow(saved.followLight===true&&!reduceMotion());
+  $('#adaptive').setAttribute('aria-checked',String(state.adaptive));$('#scene-light').value=Math.round(state.brightness*100);
+  setScene(['coral','aurora','grid'].includes(saved.scene)?saved.scene:'coral');
+  const match=Object.keys(presets).find(name=>Object.keys(presets[name]).every(key=>presets[name][key]===state[key]));
+  if(match)setPreset(match);else{$$('[data-preset]').forEach(b=>b.setAttribute('aria-pressed','false'));$('#preset-label').textContent='—';$('#material-state').textContent='SAVED / V.01';}
+  state.fusion=saved.fusion===true;fusionMix=state.fusion?1:0;drop.setAttribute('aria-pressed',String(state.fusion));drop.setAttribute('aria-label',state.fusion?'分离两块玻璃':'融合两块玻璃');$('#scene-hint').textContent=state.fusion?'两个轮廓，一片连续的光。再次点击即可分离。':'移动玻璃，或点击 ＋ 看它们融为一体';clampLens();positionLens();positionDrop();
+  syncRanges();$('#favorite').setAttribute('aria-pressed','true');$('#favorite svg').style.fill='#ffffffcf';invalidate();
+ }catch{/* Storage may be unavailable on file: URLs or in private contexts. */}
+}
+
+setFollow(state.followLight);syncRanges();layout(true);restoreFavorite();
+// Small public API: useful for integration and browser verification.
+window.liquidGlass={get config(){return exportedConfig();},get renderer(){return engine;},setPreset,setScene,reset:()=>$('#reset').click(),destroy(){disposed=true;events.abort();clearTimeout(toastTimer);imageRequest++;observer.disconnect();if(frameId)cancelAnimationFrame(frameId);if(engine)engine.destroy();if(customURL)URL.revokeObjectURL(customURL);}};
+})();
+</script>
+</body>
+</html>

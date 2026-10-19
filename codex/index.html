@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7f9">
+  <meta name="description" content="原生 Web 液态玻璃控件实验室。实时调节二维折射、模糊、高光与融球效果。">
+  <title>Liquid — 液态玻璃实验室</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23171920'/%3E%3Cpath d='M32 12C25 23 18 30 18 39a14 14 0 0028 0c0-9-7-16-14-27z' fill='%23d5e6ff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script src="liquid-glass.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <svg class="icon-defs" aria-hidden="true"><defs>
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3C9 8 5.5 11 5.5 15a6.5 6.5 0 0 0 13 0C18.5 11 15 8 12 3Z"/><path d="M8.5 15a3.5 3.5 0 0 0 3.5 3.5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M6 18 18 6M6 6h12v12"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m7 7-5 5 5 5M17 7l5 5-5 5M14 4l-4 16"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="m11 4-6 5H2v6h3l6 5ZM15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H3ZM9 20v-7h6v7"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m16 8-2 6-6 2 2-6Z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20 5c-3-3-7-1-8 1-1-2-5-4-8-1-5 5 2 10 8 15 6-5 13-10 8-15Z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v2M12 21v2M1 12h2M21 12h2M4 4l2 2M18 18l2 2M4 20l2-2M18 6l2-2"/></symbol>
+    <symbol id="i-move" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M8 7l4-4 4 4M8 17l4 4 4-4M7 8l-4 4 4 4M17 8l4 4-4 4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+  </defs></svg>
+  <header class="site-header">
+    <a class="wordmark" href="#" aria-label="Liquid 实验室首页"><span class="brand-symbol"><svg><use href="#i-drop"/></svg></span>liquid<span class="wordmark-dot">.</span><span class="brand-divider"></span><span class="brand-note">交互材质实验室</span></a>
+    <div class="header-right"><span class="native-badge"><i></i>原生 Web · 零依赖</span><button class="text-button" id="open-code"><svg><use href="#i-code"/></svg>查看原理</button></div>
+  </header>
+  <main>
+    <section class="intro"><div><div class="eyebrow">EXPERIMENT 001 <span>/</span> LIQUID GLASS</div><h1>让界面，轻一点<span>。</span></h1><p>折射光线，留住内容。探索一块玻璃的无限可能。</p></div><div class="intro-note"><span>Inspired by WWDC25</span><span>Designed for the web <svg><use href="#i-arrow"/></svg></span></div></section>
+    <section class="workspace" aria-label="液态玻璃交互实验室">
+      <div class="preview-column">
+        <div class="preview-toolbar"><div class="preview-title"><span class="live-dot"></span>实时画布 <span class="muted">/</span> <span id="scene-name">海岸晨光</span></div><div class="segmented" aria-label="预览模式"><button class="selected" data-mode="glass" aria-pressed="true">液态玻璃</button><button data-mode="frosted" aria-pressed="false">普通毛玻璃</button><button data-mode="map" aria-pressed="false" title="R 通道控制水平，G 通道控制垂直采样">置换场</button></div></div>
+        <div class="stage" id="stage">
+          <canvas id="glass-canvas" aria-label="实时渲染的玻璃折射背景"></canvas>
+          <div class="stage-top"><span class="scene-index">01 / COASTLINE</span><span class="weather"><svg><use href="#i-sun"/></svg> 18° <span>静好的一天</span></span></div>
+          <div class="scene-description"><span id="scene-description">在光与海之间，慢下来。</span><span class="scene-coordinates">36°16′ N &nbsp; 121°48′ W</span></div>
+          <button class="glass lens" id="lens" data-glass data-radius="72" aria-label="可拖动透镜，使用方向键移动"><svg><use href="#i-move"/></svg><span>拖动探索</span></button>
+          <div class="glass player" data-glass data-radius="28"><div class="album-art"><span>soft<br>focus.</span></div><div class="track-info"><strong id="track-name">Ocean Air</strong><span id="track-status">合成氛围音 · 点击播放</span></div><button class="play-button" id="play" aria-label="播放氛围音" aria-pressed="false"><svg><use href="#i-play"/></svg></button></div>
+          <div class="glass volume-control" data-glass data-radius="26"><svg><use href="#i-volume"/></svg><input id="volume" type="range" min="0" max="100" value="32" aria-label="音量"><output id="volume-value" for="volume">32</output></div>
+          <nav class="glass dock" data-glass data-radius="34" aria-label="场景导航"><span class="dock-indicator" aria-hidden="true"></span><button class="active" data-view="home" aria-label="首页" aria-pressed="true"><svg><use href="#i-home"/></svg><span>首页</span></button><button data-view="explore" aria-label="探索" aria-pressed="false"><svg><use href="#i-compass"/></svg><span>探索</span></button><button data-view="favorites" aria-label="收藏" aria-pressed="false"><svg><use href="#i-heart"/></svg><span>收藏</span></button></nav>
+          <button class="glass favorite" data-glass data-radius="32" id="favorite" aria-label="收藏当前场景" aria-pressed="false"><svg><use href="#i-plus"/></svg></button>
+          <span class="canvas-hint">移动光标，观察光线流转</span>
+        </div>
+        <div class="preview-footer"><span><svg><use href="#i-move"/></svg>拖动圆形透镜，观察背景折射</span><span id="renderer-status">正在初始化渲染器</span></div>
+      </div>
+      <aside class="inspector" aria-label="玻璃材质参数">
+        <div class="inspector-heading"><div><h2>材质调校</h2><span>MATERIAL PROPERTIES</span></div><button class="icon-button" id="reset" aria-label="恢复默认参数" title="恢复默认参数"><svg><use href="#i-reset"/></svg></button></div>
+        <fieldset class="preset-field"><legend>材质预设</legend><div class="presets"><button data-preset="clear" class="selected" aria-pressed="true">清透</button><button data-preset="soft" aria-pressed="false">柔雾</button><button data-preset="strong" aria-pressed="false">水晶</button></div></fieldset>
+        <div class="slider-group"><label for="refraction">折射强度 <output id="refraction-value">55<span>%</span></output></label><input id="refraction" type="range" min="0" max="100" value="55"><div class="range-ends"><span>平静</span><span>流动</span></div></div>
+        <div class="slider-group"><label for="blur">背景模糊 <output id="blur-value">2.0<span>px</span></output></label><input id="blur" type="range" min="0" max="16" step="0.5" value="2"><div class="range-ends"><span>清晰</span><span>朦胧</span></div></div>
+        <div class="slider-group compact"><label for="shine">边缘高光 <output id="shine-value">65<span>%</span></output></label><input id="shine" type="range" min="0" max="100" value="65"></div>
+        <div class="slider-group compact"><label for="tint">染色浓度 <output id="tint-value">12<span>%</span></output></label><input id="tint" type="range" min="0" max="60" value="12"></div>
+        <div class="color-row"><span>玻璃色调</span><div class="swatches" aria-label="玻璃色调"><button style="--swatch:#ecf4ff" data-color="#ecf4ff" class="selected" aria-label="冰白" aria-pressed="true"></button><button style="--swatch:#b8d5ef" data-color="#b8d5ef" aria-label="海蓝" aria-pressed="false"></button><button style="--swatch:#ddc8e8" data-color="#ddc8e8" aria-label="浅紫" aria-pressed="false"></button><button style="--swatch:#ecc7ba" data-color="#ecc7ba" aria-label="暖杏" aria-pressed="false"></button></div></div>
+        <div class="inspector-divider"></div>
+        <div class="toggle-row"><label for="follow-light">光线跟随<span>高光随光标位置变化</span></label><input type="checkbox" role="switch" id="follow-light" checked></div>
+        <div class="toggle-row"><label for="adaptive">自适应可读性<span>按玻璃面积增加模糊</span></label><input type="checkbox" role="switch" id="adaptive"></div>
+        <div class="inspector-divider"></div>
+        <fieldset class="background-field"><legend>切换背景</legend><div class="background-options"><button class="bg-option coast selected" data-scene="coast" aria-label="海岸晨光" aria-pressed="true"><span>晨光</span></button><button class="bg-option aurora" data-scene="aurora" aria-label="流动极光" aria-pressed="false"><span>极光</span></button><button class="bg-option grid" data-scene="grid" aria-label="折射测试网格" aria-pressed="false"><span>网格</span></button></div></fieldset>
+        <button class="export-button" id="export-config"><svg><use href="#i-code"/></svg>复制材质参数<svg><use href="#i-arrow"/></svg></button>
+      </aside>
+    </section>
+    <section class="details-strip" aria-label="实现特性">
+      <div class="detail-item"><span class="detail-number">01</span><div><h3>真正的背景置换</h3><p>以二维采样场弯折画面，构成透镜感。</p></div><span class="mini-lens" aria-hidden="true"></span></div>
+      <div class="detail-item"><span class="detail-number">02</span><div><h3>随形而动的光</h3><p>从圆角轮廓计算法线，生成边缘高光。</p></div><span class="mini-shine" aria-hidden="true"></span></div>
+      <button class="detail-item merge-card" id="merge-open"><span class="detail-number">03</span><div><h3>像液体一样相融 <svg><use href="#i-arrow"/></svg></h3><p>打开融球实验，拖动两个玻璃圆球。</p></div><span class="mini-merge" aria-hidden="true"></span></button>
+    </section>
+    <footer class="site-footer"><span>LIQUID LAB <span class="footer-dot">·</span> A study in light & interaction.</span><span>HTML / CSS / WEBGL <span class="footer-dot">·</span> 2026</span></footer>
+  </main>
+  <dialog id="code-dialog"><div class="dialog-heading"><span class="eyebrow">UNDER THE SURFACE</span><button class="icon-button dialog-close" aria-label="关闭原理说明"><svg><use href="#i-close"/></svg></button></div><h2>一块玻璃，四层计算。</h2><p>这是基于你提供的分析制作的 Web 近似实现，不代表苹果公开了其内部渲染方式。</p><ol><li><strong>准备背景纹理</strong><span>Canvas 2D 绘制场景，WebGL 读取同一份像素。控件文字由原生 DOM 绘制，保持清晰可操作。</span></li><li><strong>构建置换场</strong><span>圆角矩形的有符号距离场（SDF）决定边缘宽度与法线。中心轻微缩放、边缘反向拉伸；红色与绿色分别表示 X / Y 采样偏移。</span></li><li><strong>折射、模糊与染色</strong><span>以偏移后的坐标采样背景，再进行九点模糊、轻微色散与色调混合。当前版本只折射画布场景，不会自动抓取任意网页 DOM。</span></li><li><strong>光照与融合</strong><span>轮廓法线与光源方向计算高光；融球实验以平滑最小值合并距离场。交互时按需重绘，尊重系统减少动态效果设置。</span></li></ol><div class="formula">sampleUV = uv + displacement / resolution</div><p class="source-links">技术参考：<a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/feDisplacementMap" target="_blank" rel="noreferrer">MDN · 置换映射</a> / <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL" target="_blank" rel="noreferrer">WebGL 纹理</a></p></dialog>
+  <dialog id="merge-dialog"><div class="dialog-heading"><span class="eyebrow">EXPERIMENT 002 / METABALLS</span><button class="icon-button dialog-close" aria-label="关闭融球实验"><svg><use href="#i-close"/></svg></button></div><h2>靠近，然后相融。</h2><p>拖动任意圆球，或聚焦后使用方向键。边缘在接近时自然连接。</p><div class="merge-stage" id="merge-stage"><canvas id="merge-canvas" aria-label="融球效果背景"></canvas><button class="glass orb orb-a" data-glass data-radius="60" data-merge="1" aria-label="玻璃圆球 A，可用方向键移动"><svg><use href="#i-move"/></svg></button><button class="glass orb orb-b" data-glass data-radius="60" data-merge="1" aria-label="玻璃圆球 B，可用方向键移动"><svg><use href="#i-move"/></svg></button></div><label class="merge-range" for="fusion">融合范围<input type="range" id="fusion" min="1" max="80" value="36"><output id="fusion-value">36px</output></label></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
